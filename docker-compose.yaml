@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  rabbit:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  productservice:
+    build:
+      context: ./productservice
+    ports:
+      - "50051:50051"
+    depends_on:
+      - rabbit
+      - postgres
+
+  mainservice:
+    build:
+      context: ./mainservice
+    ports:
+      - "8021:8021"
+    depends_on:
+      - productservice
+
+  consumer:
+    build:
+      context: ./notificationservice
+    depends_on:
+      rabbit:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5439:5432"
+    volumes:
+      - ./pgdata:/var/li

@@ -1,0 +1,12 @@
+product_service:
+  host: "productservice"
+  port: 50051
+router:
+  host: "127.0.0.1"
+  port: "8021"
+rabbit:
+  login: "guest"
+  password: "guest"
+  host: "rabbit"
+  port: "5672"
+  channel: "orders"
