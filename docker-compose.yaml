@@ -12,39 +12,26 @@ services:
       timeout: 5s
       retries: 5
 
-  productservice:
+  parseservice:
     build:
-      context: ./productservice
-    ports:
-      - "50051:50051"
-    depends_on:
-      - rabbit
-      - postgres
-
-  mainservice:
-    build:
-      context: ./mainservice
-    ports:
-      - "8021:8021"
-    depends_on:
-      - productservice
-
-  consumer:
-    build:
-      context: ./notificationservice
+      context: parseService
     depends_on:
       rabbit:
         condition: service_healthy
 
-  postgres:
-    image: postgres:latest
-    container_name: postgres_container
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-      PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - "5439:5432"
-    volumes:
-      - ./pgdata:/var/li
+  repositoryservice:
+      build:
+        context: repositoryService
+      ports:
+        - "50051:50051"
+      depends_on:
+        - rabbit
+
+  telegram_bot:
+    build:
+      context: stepStepichBot
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    env_file:
+      - .env
