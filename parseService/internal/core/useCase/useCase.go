@@ -2,9 +2,10 @@ package useCase
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"parseService/internal/core/entity"
-	"strings"
+	"regexp"
 	"time"
 )
 
@@ -57,13 +58,18 @@ func (uc UseCase) StartMessageListening(ctx context.Context) error {
 }
 
 func parseMemes(text string) []string {
-	lines := strings.Split(text, "\n")
 	var memes []string
-	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if trimmed != "" {
-			memes = append(memes, trimmed)
-		}
+
+	re := regexp.MustCompile(`(?m)"(.+?)"\s*(?:\((?:С|с|©)\)\s*([^
+]+))?`)
+	matches := re.FindAllStringSubmatch(text, -1)
+
+	for _, match := range matches {
+		quote := match[1]
+		author := match[2]
+		formatted := fmt.Sprintf("\"%s\" (%s)", quote, author)
+		memes = append(memes, formatted)
 	}
+
 	return memes
 }
