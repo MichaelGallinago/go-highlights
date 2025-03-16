@@ -26,3 +26,12 @@ services:
         - "50051:50051"
       depends_on:
         - rabbit
+
+  telegram_bot:
+    build:
+      context: stepStepichBot
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    env_file:
+      - .env
