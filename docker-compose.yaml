@@ -26,6 +26,7 @@ services:
         - "50051:50051"
       depends_on:
         - rabbit
+        - postgres
 
   telegram_bot:
     build:
@@ -35,3 +36,12 @@ services:
         condition: service_healthy
     env_file:
       - .env
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
