@@ -68,8 +68,6 @@ func (s *RepositoryServiceServer) PublishMeme(
 	ctx context.Context,
 	req *repository.PublishMemeRequest,
 ) (*repository.PublishMemeResponse, error) {
-	slog.Info("new meme:", "timestamp", req.Timestamp, "text", req.Text)
-
 	timestamp, err := time.Parse(time.RFC3339, req.Timestamp)
 	if err != nil {
 		slog.Error("timestamp parsing error", "error", err)
@@ -83,6 +81,7 @@ func (s *RepositoryServiceServer) PublishMeme(
 		return &repository.PublishMemeResponse{Success: false}, err
 	}
 
+	slog.Info("new meme inserted:", "timestamp", req.Timestamp, "text", req.Text)
 	return &repository.PublishMemeResponse{Success: true}, nil
 }
 
