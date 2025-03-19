@@ -4,7 +4,7 @@ package repository;
 
 option go_package = "repository/";
 
-service MemeService {
+service RepositoryService {
   rpc PublishMeme (PublishMemeRequest) returns (PublishMemeResponse);
   rpc GetTopLongMemes(TopLongMemesRequest) returns (MemesResponse);
   rpc SearchMemesBySubstring(SearchRequest) returns (MemesResponse);

@@ -19,17 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MemeService_PublishMeme_FullMethodName            = "/repository.MemeService/PublishMeme"
-	MemeService_GetTopLongMemes_FullMethodName        = "/repository.MemeService/GetTopLongMemes"
-	MemeService_SearchMemesBySubstring_FullMethodName = "/repository.MemeService/SearchMemesBySubstring"
-	MemeService_GetMemesByMonth_FullMethodName        = "/repository.MemeService/GetMemesByMonth"
-	MemeService_GetRandomMeme_FullMethodName          = "/repository.MemeService/GetRandomMeme"
+	RepositoryService_PublishMeme_FullMethodName            = "/repository.RepositoryService/PublishMeme"
+	RepositoryService_GetTopLongMemes_FullMethodName        = "/repository.RepositoryService/GetTopLongMemes"
+	RepositoryService_SearchMemesBySubstring_FullMethodName = "/repository.RepositoryService/SearchMemesBySubstring"
+	RepositoryService_GetMemesByMonth_FullMethodName        = "/repository.RepositoryService/GetMemesByMonth"
+	RepositoryService_GetRandomMeme_FullMethodName          = "/repository.RepositoryService/GetRandomMeme"
 )
 
-// MemeServiceClient is the client API for MemeService service.
+// RepositoryServiceClient is the client API for RepositoryService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type MemeServiceClient interface {
+type RepositoryServiceClient interface {
 	PublishMeme(ctx context.Context, in *PublishMemeRequest, opts ...grpc.CallOption) (*PublishMemeResponse, error)
 	GetTopLongMemes(ctx context.Context, in *TopLongMemesRequest, opts ...grpc.CallOption) (*MemesResponse, error)
 	SearchMemesBySubstring(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*MemesResponse, error)
@@ -37,235 +37,235 @@ type MemeServiceClient interface {
 	GetRandomMeme(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MemeResponse, error)
 }
 
-type memeServiceClient struct {
+type repositoryServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewMemeServiceClient(cc grpc.ClientConnInterface) MemeServiceClient {
-	return &memeServiceClient{cc}
+func NewRepositoryServiceClient(cc grpc.ClientConnInterface) RepositoryServiceClient {
+	return &repositoryServiceClient{cc}
 }
 
-func (c *memeServiceClient) PublishMeme(ctx context.Context, in *PublishMemeRequest, opts ...grpc.CallOption) (*PublishMemeResponse, error) {
+func (c *repositoryServiceClient) PublishMeme(ctx context.Context, in *PublishMemeRequest, opts ...grpc.CallOption) (*PublishMemeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PublishMemeResponse)
-	err := c.cc.Invoke(ctx, MemeService_PublishMeme_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, RepositoryService_PublishMeme_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *memeServiceClient) GetTopLongMemes(ctx context.Context, in *TopLongMemesRequest, opts ...grpc.CallOption) (*MemesResponse, error) {
+func (c *repositoryServiceClient) GetTopLongMemes(ctx context.Context, in *TopLongMemesRequest, opts ...grpc.CallOption) (*MemesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(MemesResponse)
-	err := c.cc.Invoke(ctx, MemeService_GetTopLongMemes_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, RepositoryService_GetTopLongMemes_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *memeServiceClient) SearchMemesBySubstring(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*MemesResponse, error) {
+func (c *repositoryServiceClient) SearchMemesBySubstring(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*MemesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(MemesResponse)
-	err := c.cc.Invoke(ctx, MemeService_SearchMemesBySubstring_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, RepositoryService_SearchMemesBySubstring_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *memeServiceClient) GetMemesByMonth(ctx context.Context, in *MonthRequest, opts ...grpc.CallOption) (*MemesResponse, error) {
+func (c *repositoryServiceClient) GetMemesByMonth(ctx context.Context, in *MonthRequest, opts ...grpc.CallOption) (*MemesResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(MemesResponse)
-	err := c.cc.Invoke(ctx, MemeService_GetMemesByMonth_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, RepositoryService_GetMemesByMonth_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *memeServiceClient) GetRandomMeme(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MemeResponse, error) {
+func (c *repositoryServiceClient) GetRandomMeme(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MemeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(MemeResponse)
-	err := c.cc.Invoke(ctx, MemeService_GetRandomMeme_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, RepositoryService_GetRandomMeme_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// MemeServiceServer is the server API for MemeService service.
-// All implementations must embed UnimplementedMemeServiceServer
+// RepositoryServiceServer is the server API for RepositoryService service.
+// All implementations must embed UnimplementedRepositoryServiceServer
 // for forward compatibility.
-type MemeServiceServer interface {
+type RepositoryServiceServer interface {
 	PublishMeme(context.Context, *PublishMemeRequest) (*PublishMemeResponse, error)
 	GetTopLongMemes(context.Context, *TopLongMemesRequest) (*MemesResponse, error)
 	SearchMemesBySubstring(context.Context, *SearchRequest) (*MemesResponse, error)
 	GetMemesByMonth(context.Context, *MonthRequest) (*MemesResponse, error)
 	GetRandomMeme(context.Context, *Empty) (*MemeResponse, error)
-	mustEmbedUnimplementedMemeServiceServer()
+	mustEmbedUnimplementedRepositoryServiceServer()
 }
 
-// UnimplementedMemeServiceServer must be embedded to have
+// UnimplementedRepositoryServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedMemeServiceServer struct{}
+type UnimplementedRepositoryServiceServer struct{}
 
-func (UnimplementedMemeServiceServer) PublishMeme(context.Context, *PublishMemeRequest) (*PublishMemeResponse, error) {
+func (UnimplementedRepositoryServiceServer) PublishMeme(context.Context, *PublishMemeRequest) (*PublishMemeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PublishMeme not implemented")
 }
-func (UnimplementedMemeServiceServer) GetTopLongMemes(context.Context, *TopLongMemesRequest) (*MemesResponse, error) {
+func (UnimplementedRepositoryServiceServer) GetTopLongMemes(context.Context, *TopLongMemesRequest) (*MemesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTopLongMemes not implemented")
 }
-func (UnimplementedMemeServiceServer) SearchMemesBySubstring(context.Context, *SearchRequest) (*MemesResponse, error) {
+func (UnimplementedRepositoryServiceServer) SearchMemesBySubstring(context.Context, *SearchRequest) (*MemesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchMemesBySubstring not implemented")
 }
-func (UnimplementedMemeServiceServer) GetMemesByMonth(context.Context, *MonthRequest) (*MemesResponse, error) {
+func (UnimplementedRepositoryServiceServer) GetMemesByMonth(context.Context, *MonthRequest) (*MemesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMemesByMonth not implemented")
 }
-func (UnimplementedMemeServiceServer) GetRandomMeme(context.Context, *Empty) (*MemeResponse, error) {
+func (UnimplementedRepositoryServiceServer) GetRandomMeme(context.Context, *Empty) (*MemeResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRandomMeme not implemented")
 }
-func (UnimplementedMemeServiceServer) mustEmbedUnimplementedMemeServiceServer() {}
-func (UnimplementedMemeServiceServer) testEmbeddedByValue()                     {}
+func (UnimplementedRepositoryServiceServer) mustEmbedUnimplementedRepositoryServiceServer() {}
+func (UnimplementedRepositoryServiceServer) testEmbeddedByValue()                           {}
 
-// UnsafeMemeServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to MemeServiceServer will
+// UnsafeRepositoryServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to RepositoryServiceServer will
 // result in compilation errors.
-type UnsafeMemeServiceServer interface {
-	mustEmbedUnimplementedMemeServiceServer()
+type UnsafeRepositoryServiceServer interface {
+	mustEmbedUnimplementedRepositoryServiceServer()
 }
 
-func RegisterMemeServiceServer(s grpc.ServiceRegistrar, srv MemeServiceServer) {
-	// If the following call pancis, it indicates UnimplementedMemeServiceServer was
+func RegisterRepositoryServiceServer(s grpc.ServiceRegistrar, srv RepositoryServiceServer) {
+	// If the following call pancis, it indicates UnimplementedRepositoryServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&MemeService_ServiceDesc, srv)
+	s.RegisterService(&RepositoryService_ServiceDesc, srv)
 }
 
-func _MemeService_PublishMeme_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RepositoryService_PublishMeme_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PublishMemeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MemeServiceServer).PublishMeme(ctx, in)
+		return srv.(RepositoryServiceServer).PublishMeme(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MemeService_PublishMeme_FullMethodName,
+		FullMethod: RepositoryService_PublishMeme_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MemeServiceServer).PublishMeme(ctx, req.(*PublishMemeRequest))
+		return srv.(RepositoryServiceServer).PublishMeme(ctx, req.(*PublishMemeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MemeService_GetTopLongMemes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RepositoryService_GetTopLongMemes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TopLongMemesRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MemeServiceServer).GetTopLongMemes(ctx, in)
+		return srv.(RepositoryServiceServer).GetTopLongMemes(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MemeService_GetTopLongMemes_FullMethodName,
+		FullMethod: RepositoryService_GetTopLongMemes_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MemeServiceServer).GetTopLongMemes(ctx, req.(*TopLongMemesRequest))
+		return srv.(RepositoryServiceServer).GetTopLongMemes(ctx, req.(*TopLongMemesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MemeService_SearchMemesBySubstring_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RepositoryService_SearchMemesBySubstring_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SearchRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MemeServiceServer).SearchMemesBySubstring(ctx, in)
+		return srv.(RepositoryServiceServer).SearchMemesBySubstring(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MemeService_SearchMemesBySubstring_FullMethodName,
+		FullMethod: RepositoryService_SearchMemesBySubstring_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MemeServiceServer).SearchMemesBySubstring(ctx, req.(*SearchRequest))
+		return srv.(RepositoryServiceServer).SearchMemesBySubstring(ctx, req.(*SearchRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MemeService_GetMemesByMonth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RepositoryService_GetMemesByMonth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MonthRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MemeServiceServer).GetMemesByMonth(ctx, in)
+		return srv.(RepositoryServiceServer).GetMemesByMonth(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MemeService_GetMemesByMonth_FullMethodName,
+		FullMethod: RepositoryService_GetMemesByMonth_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MemeServiceServer).GetMemesByMonth(ctx, req.(*MonthRequest))
+		return srv.(RepositoryServiceServer).GetMemesByMonth(ctx, req.(*MonthRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MemeService_GetRandomMeme_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RepositoryService_GetRandomMeme_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MemeServiceServer).GetRandomMeme(ctx, in)
+		return srv.(RepositoryServiceServer).GetRandomMeme(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: MemeService_GetRandomMeme_FullMethodName,
+		FullMethod: RepositoryService_GetRandomMeme_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MemeServiceServer).GetRandomMeme(ctx, req.(*Empty))
+		return srv.(RepositoryServiceServer).GetRandomMeme(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// MemeService_ServiceDesc is the grpc.ServiceDesc for MemeService service.
+// RepositoryService_ServiceDesc is the grpc.ServiceDesc for RepositoryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var MemeService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "repository.MemeService",
-	HandlerType: (*MemeServiceServer)(nil),
+var RepositoryService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "repository.RepositoryService",
+	HandlerType: (*RepositoryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "PublishMeme",
-			Handler:    _MemeService_PublishMeme_Handler,
+			Handler:    _RepositoryService_PublishMeme_Handler,
 		},
 		{
 			MethodName: "GetTopLongMemes",
-			Handler:    _MemeService_GetTopLongMemes_Handler,
+			Handler:    _RepositoryService_GetTopLongMemes_Handler,
 		},
 		{
 			MethodName: "SearchMemesBySubstring",
-			Handler:    _MemeService_SearchMemesBySubstring_Handler,
+			Handler:    _RepositoryService_SearchMemesBySubstring_Handler,
 		},
 		{
 			MethodName: "GetMemesByMonth",
-			Handler:    _MemeService_GetMemesByMonth_Handler,
+			Handler:    _RepositoryService_GetMemesByMonth_Handler,
 		},
 		{
 			MethodName: "GetRandomMeme",
-			Handler:    _MemeService_GetRandomMeme_Handler,
+			Handler:    _RepositoryService_GetRandomMeme_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
