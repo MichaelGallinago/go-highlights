@@ -16,8 +16,8 @@ import (
 
 const connection = "host=%s port=%s user=%s password=%s dbname=%s sslmode=%s"
 
-type MemeServiceServer struct {
-	repository.UnimplementedMemeServiceServer
+type RepositoryServiceServer struct {
+	repository.UnimplementedRepositoryServiceServer
 	db *pgxpool.Pool
 }
 
@@ -28,7 +28,7 @@ func startGRPCServer(db *pgxpool.Pool) {
 	}
 
 	grpcServer := grpc.NewServer()
-	repository.RegisterMemeServiceServer(grpcServer, &MemeServiceServer{db: db})
+	repository.RegisterRepositoryServiceServer(grpcServer, &RepositoryServiceServer{db: db})
 
 	slog.Info("gRPC server started on port 50051")
 	if err := grpcServer.Serve(listener); err != nil {
@@ -65,7 +65,7 @@ func main() {
 	startGRPCServer(db)
 }
 
-func (s *MemeServiceServer) PublishMeme(
+func (s *RepositoryServiceServer) PublishMeme(
 	ctx context.Context,
 	req *repository.PublishMemeRequest,
 ) (*repository.PublishMemeResponse, error) {
@@ -87,7 +87,7 @@ func (s *MemeServiceServer) PublishMeme(
 	return &repository.PublishMemeResponse{Success: true}, nil
 }
 
-func (s *MemeServiceServer) GetTopLongMemes(
+func (s *RepositoryServiceServer) GetTopLongMemes(
 	ctx context.Context,
 	req *repository.TopLongMemesRequest,
 ) (*repository.MemesResponse, error) {
@@ -114,7 +114,7 @@ func (s *MemeServiceServer) GetTopLongMemes(
 	return &repository.MemesResponse{Memes: memes}, nil
 }
 
-func (s *MemeServiceServer) SearchMemesBySubstring(
+func (s *RepositoryServiceServer) SearchMemesBySubstring(
 	ctx context.Context,
 	req *repository.SearchRequest,
 ) (*repository.MemesResponse, error) {
@@ -141,7 +141,7 @@ func (s *MemeServiceServer) SearchMemesBySubstring(
 	return &repository.MemesResponse{Memes: memes}, nil
 }
 
-func (s *MemeServiceServer) GetMemesByMonth(
+func (s *RepositoryServiceServer) GetMemesByMonth(
 	ctx context.Context,
 	req *repository.MonthRequest,
 ) (*repository.MemesResponse, error) {
@@ -173,7 +173,7 @@ func (s *MemeServiceServer) GetMemesByMonth(
 	return &repository.MemesResponse{Memes: memes}, nil
 }
 
-func (s *MemeServiceServer) GetRandomMeme(
+func (s *RepositoryServiceServer) GetRandomMeme(
 	ctx context.Context,
 	req *repository.Empty,
 ) (*repository.MemeResponse, error) {
