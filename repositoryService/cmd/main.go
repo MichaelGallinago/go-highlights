@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"net"
 	"repositoryService/repository"
-	"strconv"
 	"time"
 
 	"google.golang.org/grpc"
@@ -71,14 +70,14 @@ func (s *RepositoryServiceServer) PublishMeme(
 ) (*repository.PublishMemeResponse, error) {
 	slog.Info("new meme:", "timestamp", req.Timestamp, "text", req.Text)
 
-	timestamp, err := strconv.ParseInt(req.Timestamp, 10, 64)
+	timestamp, err := time.Parse(time.RFC3339, req.Timestamp)
 	if err != nil {
 		slog.Error("timestamp parsing error", "error", err)
 		return &repository.PublishMemeResponse{Success: false}, err
 	}
 
 	query := "INSERT INTO memes (timestamp, text) VALUES ($1, $2)"
-	_, err = s.db.Exec(ctx, query, timestamp, req.Text)
+	_, err = s.db.Exec(ctx, query, timestamp.Unix(), req.Text)
 	if err != nil {
 		slog.Error("insert error", "error", err)
 		return &repository.PublishMemeResponse{Success: false}, err
