@@ -6,6 +6,7 @@ import (
 	"log"
 	"parseService/internal/core/entity"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -60,14 +61,22 @@ func (uc UseCase) StartMessageListening(ctx context.Context) error {
 func parseMemes(text string) []string {
 	var memes []string
 
-	re := regexp.MustCompile(`(?m)"(.+?)"\s*(?:\((?:С|с|©)\)\s*([^
-]+))?`)
+	re := regexp.MustCompile(`(?m)"((?:[^"\\]|\\.)+)"\s*(?:\((с|С)\)|©)?\s*([A-Za-zА-Яа-яёЁ, ]*)`)
 	matches := re.FindAllStringSubmatch(text, -1)
 
 	for _, match := range matches {
 		quote := match[1]
-		author := match[2]
-		formatted := fmt.Sprintf("\"%s\" (%s)", quote, author)
+		author := match[3]
+
+		var formatted string
+
+		if author == "" {
+			formatted = fmt.Sprintf("\"%s\"", quote)
+		} else {
+			formatted = fmt.Sprintf("\"%s\" (%s)", quote, author)
+		}
+
+		formatted = strings.ReplaceAll(formatted, `\"`, `"`)
 		memes = append(memes, formatted)
 	}
 
