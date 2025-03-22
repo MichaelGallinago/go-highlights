@@ -44,7 +44,7 @@ func main() {
 	}
 
 	memeClient := grpcclient.NewGrpcMemeClient(cfg.RepositoryService)
-	notificationServer := rabbitclient.NewRabbitClient(cfg.Rabbit)
+	requesterServer := rabbitclient.NewRabbitClient(cfg.Rabbit)
 	uc := useCase.NewUseCase(memeClient, notificationClient)
 
 	ctx, cancel := context.WithCancel(context.Background())

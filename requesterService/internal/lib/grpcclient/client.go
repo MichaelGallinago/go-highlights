@@ -36,7 +36,7 @@ func (c GrpcMemeClient) Publish(ctx context.Context, meme entity.Meme) error {
 	client := c.conns.Get().(*grpc.ClientConn)
 	defer c.conns.Put(client)
 
-	_, err := repository.NewRepositoryServiceClient(client).PublishMeme(ctx, &repository.PublishMemeRequest{
+	_, err := repository.NewRepositoryServiceSearchClient(client).PublishMeme(ctx, &repository.PublishMemeRequest{
 		Timestamp: meme.Timestamp.Format("2006-01-02T15:04:05Z"),
 		Text:      meme.Text,
 	})
