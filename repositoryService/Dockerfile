@@ -14,7 +14,6 @@ FROM alpine:latest
 
 COPY --from=builder /app/grpc-server /grpc-server
 
-EXPOSE 50051
-EXPOSE 50052
+EXPOSE 50051 50052
 
 CMD ["/grpc-server"]

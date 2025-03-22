@@ -24,6 +24,7 @@ services:
         context: repositoryService
       ports:
         - "50051:50051"
+        - "50052:50052"
       depends_on:
         - rabbit
         - postgres
