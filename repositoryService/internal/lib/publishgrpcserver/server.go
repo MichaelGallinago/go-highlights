@@ -7,13 +7,13 @@ import (
 	"log/slog"
 	"net"
 	"repositoryService/internal/lib/postgresclient"
-	"repositoryService/repository"
+	"repositoryService/repository/publish"
 	"strconv"
 	"time"
 )
 
 type PublishGrpcServer struct {
-	repository.UnimplementedRepositoryServiceServer
+	publish.UnimplementedRepositoryServicePublishServer
 	DB postgresclient.PostgresClient
 }
 
@@ -28,7 +28,7 @@ func NewPublishGrpcServer(config Config, db postgresclient.PostgresClient) *Publ
 	grpcServer := grpc.NewServer()
 	server := &PublishGrpcServer{DB: db}
 
-	repository.RegisterRepositoryServiceServer(grpcServer, server)
+	publish.RegisterRepositoryServicePublishServer(grpcServer, server)
 
 	slog.Info("Publish gRPC server started on port " + port)
 	go func() {
@@ -42,20 +42,20 @@ func NewPublishGrpcServer(config Config, db postgresclient.PostgresClient) *Publ
 
 // PublishMeme сохраняет мем в БД
 func (s *PublishGrpcServer) PublishMeme(
-	ctx context.Context, req *repository.PublishMemeRequest,
-) (*repository.PublishMemeResponse, error) {
+	ctx context.Context, req *publish.PublishMemeRequest,
+) (*publish.PublishMemeResponse, error) {
 	timestamp, err := time.Parse(time.RFC3339, req.Timestamp)
 	if err != nil {
 		slog.Error("timestamp parsing error", "error", err)
-		return &repository.PublishMemeResponse{Success: false}, err
+		return &publish.PublishMemeResponse{Success: false}, err
 	}
 
 	err = s.DB.InsertMeme(ctx, timestamp.Unix(), req.Text)
 	if err != nil {
 		slog.Error("insert error", "error", err)
-		return &repository.PublishMemeResponse{Success: false}, err
+		return &publish.PublishMemeResponse{Success: false}, err
 	}
 
 	slog.Info("new meme inserted:", "timestamp", req.Timestamp, "text", req.Text)
-	return &repository.PublishMemeResponse{Success: true}, nil
+	return &publish.PublishMemeResponse{Success: true}, nil
 }

@@ -9,13 +9,13 @@ import (
 	"net"
 	"repositoryService/internal/core/entity"
 	"repositoryService/internal/lib/postgresclient"
-	"repositoryService/repository"
+	"repositoryService/repository/search"
 	"strconv"
 	"time"
 )
 
 type SearchGrpcServer struct {
-	repository.UnimplementedRepositoryServiceServer
+	search.UnimplementedRepositoryServiceSearchServer
 	DB postgresclient.PostgresClient
 }
 
@@ -28,7 +28,7 @@ func NewSearchGrpcServer(config Config, db postgresclient.PostgresClient) *Searc
 
 	grpcServer := grpc.NewServer()
 	server := &SearchGrpcServer{DB: db}
-	repository.RegisterRepositoryServiceServer(grpcServer, server)
+	search.RegisterRepositoryServiceSearchServer(grpcServer, server)
 
 	slog.Info("Search gRPC server started on port " + port)
 	go func() {
@@ -42,8 +42,8 @@ func NewSearchGrpcServer(config Config, db postgresclient.PostgresClient) *Searc
 
 // GetTopLongMemes возвращает мемы с самой большой длиной
 func (s *SearchGrpcServer) GetTopLongMemes(
-	ctx context.Context, req *repository.TopLongMemesRequest,
-) (*repository.MemesResponse, error) {
+	ctx context.Context, req *search.TopLongMemesRequest,
+) (*search.MemesResponse, error) {
 	memes, err := s.DB.GetTopLongMemes(ctx, int(req.Limit))
 	if err != nil {
 		slog.Error("getting top long memes error", "error", err)
@@ -55,8 +55,8 @@ func (s *SearchGrpcServer) GetTopLongMemes(
 
 // SearchMemesBySubstring ищет мемы по подстроке
 func (s *SearchGrpcServer) SearchMemesBySubstring(
-	ctx context.Context, req *repository.SearchRequest,
-) (*repository.MemesResponse, error) {
+	ctx context.Context, req *search.SearchRequest,
+) (*search.MemesResponse, error) {
 	memes, err := s.DB.SearchMemes(ctx, req.Query)
 	if err != nil {
 		slog.Error("finding meme error", "error", err)
@@ -68,8 +68,8 @@ func (s *SearchGrpcServer) SearchMemesBySubstring(
 
 // GetMemesByMonth возвращает мемы за указанный месяц
 func (s *SearchGrpcServer) GetMemesByMonth(
-	ctx context.Context, req *repository.MonthRequest,
-) (*repository.MemesResponse, error) {
+	ctx context.Context, req *search.MonthRequest,
+) (*search.MemesResponse, error) {
 	year := int(req.Year)
 	month := time.Month(req.Month)
 
@@ -87,28 +87,28 @@ func (s *SearchGrpcServer) GetMemesByMonth(
 
 // GetRandomMeme возвращает случайный мем
 func (s *SearchGrpcServer) GetRandomMeme(
-	ctx context.Context, req *repository.Empty,
-) (*repository.MemeResponse, error) {
+	ctx context.Context, req *search.Empty,
+) (*search.MemeResponse, error) {
 	meme, err := s.DB.GetRandomMeme(ctx)
 	if err != nil {
 		slog.Error("getting random meme error", "error", err)
 		return nil, err
 	}
 
-	return &repository.MemeResponse{
+	return &search.MemeResponse{
 		Text:      meme.Text,
 		Timestamp: fmt.Sprintf("%d", meme.Timestamp),
 	}, nil
 }
 
 // mapMemesToResponse конвертирует массив мемов в gRPC-ответ
-func mapMemesToResponse(memes []entity.Meme) *repository.MemesResponse {
-	var responses []*repository.MemeResponse
+func mapMemesToResponse(memes []entity.Meme) *search.MemesResponse {
+	var responses []*search.MemeResponse
 	for _, meme := range memes {
-		responses = append(responses, &repository.MemeResponse{
+		responses = append(responses, &search.MemeResponse{
 			Text:      meme.Text,
 			Timestamp: fmt.Sprintf("%d", meme.Timestamp),
 		})
 	}
-	return &repository.MemesResponse{Memes: responses}
+	return &search.MemesResponse{Memes: responses}
 }
