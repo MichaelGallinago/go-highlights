@@ -30,10 +30,12 @@ func NewSearchGrpcServer(config Config, db postgresclient.PostgresClient) *Searc
 	server := &SearchGrpcServer{DB: db}
 	repository.RegisterRepositoryServiceServer(grpcServer, server)
 
-	log.Println("gRPC server started on port " + port)
-	if err := grpcServer.Serve(listener); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	slog.Info("Search gRPC server started on port " + port)
+	go func() {
+		if err := grpcServer.Serve(listener); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
 
 	return server
 }

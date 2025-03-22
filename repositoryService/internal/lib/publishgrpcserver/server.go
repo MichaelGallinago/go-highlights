@@ -30,10 +30,12 @@ func NewPublishGrpcServer(config Config, db postgresclient.PostgresClient) *Publ
 
 	repository.RegisterRepositoryServiceServer(grpcServer, server)
 
-	log.Println("Publish gRPC server started on port " + port)
-	if err := grpcServer.Serve(listener); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
+	slog.Info("Publish gRPC server started on port " + port)
+	go func() {
+		if err := grpcServer.Serve(listener); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
 
 	return server
 }
