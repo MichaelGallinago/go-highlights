@@ -1,6 +1,9 @@
-repository_service:
+repository_service_publish:
   network: "tcp"
   port: 50051
+repository_service_search:
+  network: "tcp"
+  port: 50052
 postgresql:
   host: "postgres"
   port: 5432

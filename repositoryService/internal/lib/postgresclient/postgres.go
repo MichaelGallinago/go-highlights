@@ -16,7 +16,7 @@ type PostgresClient struct {
 	Pool *pgxpool.Pool
 }
 
-func NewPostgresClient(config Config) *PostgresClient {
+func NewPostgresClient(config Config) PostgresClient {
 	conString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		config.Host, config.Port, config.User, config.Password, config.DbName, config.SslMode)
 
@@ -30,7 +30,7 @@ func NewPostgresClient(config Config) *PostgresClient {
 		log.Fatalf("Migration failed: %v", err)
 	}
 
-	return &PostgresClient{Pool: pool}
+	return PostgresClient{Pool: pool}
 }
 
 func runMigrations(pool *pgxpool.Pool) error {

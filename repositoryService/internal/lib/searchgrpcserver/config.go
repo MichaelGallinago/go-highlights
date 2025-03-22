@@ -1,4 +1,4 @@
-package grpcserver
+package searchgrpcserver
 
 type Config struct {
 	Network string `yaml:"network"`

@@ -7,8 +7,9 @@ import (
 	"os"
 	"os/signal"
 	"repositoryService/internal/core/useCase"
-	"repositoryService/internal/lib/grpcserver"
 	"repositoryService/internal/lib/postgresclient"
+	"repositoryService/internal/lib/publishgrpcserver"
+	"repositoryService/internal/lib/searchgrpcserver"
 	"syscall"
 )
 
@@ -29,8 +30,9 @@ func loadConfig(path string) (*Config, error) {
 }
 
 type Config struct {
-	GrpcServer     grpcserver.Config     `yaml:"repository_service"`
-	PostgresClient postgresclient.Config `yaml:"postgresql"`
+	PublishGrpcServer publishgrpcserver.Config `yaml:"repository_service_publish"`
+	SearchGrpcServer  searchgrpcserver.Config  `yaml:"repository_service_search"`
+	PostgresClient    postgresclient.Config    `yaml:"postgresql"`
 }
 
 func main() {
@@ -40,8 +42,9 @@ func main() {
 	}
 
 	db := postgresclient.NewPostgresClient(cfg.PostgresClient)
-	grpcServer := grpcserver.NewGRPCServer(cfg.GrpcServer, db)
-	uc := useCase.NewUseCase(grpcServer, grpcServer, db)
+	searchGrpcServer := searchgrpcserver.NewSearchGrpcServer(cfg.SearchGrpcServer, db)
+	publishGrpcServer := publishgrpcserver.NewPublishGrpcServer(cfg.PublishGrpcServer, db)
+	uc := useCase.NewUseCase(searchGrpcServer, publishGrpcServer, &db)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)

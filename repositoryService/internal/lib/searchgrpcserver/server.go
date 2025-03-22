@@ -1,16 +1,45 @@
-package grpcserver
+package searchgrpcserver
 
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc"
+	"log"
 	"log/slog"
+	"net"
 	"repositoryService/internal/core/entity"
+	"repositoryService/internal/lib/postgresclient"
 	"repositoryService/repository"
+	"strconv"
 	"time"
 )
 
+type SearchGrpcServer struct {
+	repository.UnimplementedRepositoryServiceServer
+	DB postgresclient.PostgresClient
+}
+
+func NewSearchGrpcServer(config Config, db postgresclient.PostgresClient) *SearchGrpcServer {
+	port := strconv.Itoa(config.Port)
+	listener, err := net.Listen(config.Network, ":"+port)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+
+	grpcServer := grpc.NewServer()
+	server := &SearchGrpcServer{DB: db}
+	repository.RegisterRepositoryServiceServer(grpcServer, server)
+
+	log.Println("gRPC server started on port " + port)
+	if err := grpcServer.Serve(listener); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
+
+	return server
+}
+
 // GetTopLongMemes возвращает мемы с самой большой длиной
-func (s *GrpcServer) GetTopLongMemes(
+func (s *SearchGrpcServer) GetTopLongMemes(
 	ctx context.Context, req *repository.TopLongMemesRequest,
 ) (*repository.MemesResponse, error) {
 	memes, err := s.DB.GetTopLongMemes(ctx, int(req.Limit))
@@ -23,7 +52,7 @@ func (s *GrpcServer) GetTopLongMemes(
 }
 
 // SearchMemesBySubstring ищет мемы по подстроке
-func (s *GrpcServer) SearchMemesBySubstring(
+func (s *SearchGrpcServer) SearchMemesBySubstring(
 	ctx context.Context, req *repository.SearchRequest,
 ) (*repository.MemesResponse, error) {
 	memes, err := s.DB.SearchMemes(ctx, req.Query)
@@ -36,7 +65,7 @@ func (s *GrpcServer) SearchMemesBySubstring(
 }
 
 // GetMemesByMonth возвращает мемы за указанный месяц
-func (s *GrpcServer) GetMemesByMonth(
+func (s *SearchGrpcServer) GetMemesByMonth(
 	ctx context.Context, req *repository.MonthRequest,
 ) (*repository.MemesResponse, error) {
 	year := int(req.Year)
@@ -55,7 +84,7 @@ func (s *GrpcServer) GetMemesByMonth(
 }
 
 // GetRandomMeme возвращает случайный мем
-func (s *GrpcServer) GetRandomMeme(
+func (s *SearchGrpcServer) GetRandomMeme(
 	ctx context.Context, req *repository.Empty,
 ) (*repository.MemeResponse, error) {
 	meme, err := s.DB.GetRandomMeme(ctx)
