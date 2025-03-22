@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"parseService/internal/core/entity"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -59,26 +58,55 @@ func (uc UseCase) StartMessageListening(ctx context.Context) error {
 }
 
 func parseMemes(text string) []string {
+	splitPoint := strings.Index(text, "\"")
+	if splitPoint != -1 {
+		text = text[splitPoint:]
+	}
+
+	blocks := strings.Split(text, "\n\n")
+
 	var memes []string
 
-	re := regexp.MustCompile(`(?m)"((?:[^"\\]|\\.)+)"\s*(?:\((с|С)\)|©)?\s*([A-Za-zА-Яа-яёЁ, ]*)`)
-	matches := re.FindAllStringSubmatch(text, -1)
+	for _, block := range blocks {
+		quote, author := parseQuoteAndAuthor(block)
 
-	for _, match := range matches {
-		quote := match[1]
-		author := match[3]
-
-		var formatted string
-
-		if author == "" {
-			formatted = fmt.Sprintf("\"%s\"", quote)
-		} else {
-			formatted = fmt.Sprintf("\"%s\" (%s)", quote, author)
+		if quote == "" {
+			continue
 		}
 
-		formatted = strings.ReplaceAll(formatted, `\"`, `"`)
-		memes = append(memes, formatted)
+		if author != "" {
+			memes = append(memes, fmt.Sprintf("%s (%s)", quote, author))
+		} else {
+			memes = append(memes, fmt.Sprintf("%s", quote))
+		}
 	}
 
 	return memes
+}
+
+func parseQuoteAndAuthor(quote string) (resultQuote, author string) {
+	resultQuote = strings.TrimSpace(quote)
+
+	lastLineStartIndex := strings.LastIndex(resultQuote, "\n")
+	author = ""
+
+	if lastLineStartIndex == -1 {
+		return resultQuote, author
+	}
+
+	lastLine := strings.TrimSpace(resultQuote[lastLineStartIndex:])
+
+	switch {
+	case strings.HasPrefix(lastLine, "(с)") || strings.HasPrefix(lastLine, "(С)"):
+		author = strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(lastLine, "(С)"), "(с)"))
+		resultQuote = resultQuote[:lastLineStartIndex]
+	case strings.HasPrefix(lastLine, "©"):
+		author = strings.TrimSpace(strings.TrimPrefix(lastLine, "©"))
+		resultQuote = resultQuote[:lastLineStartIndex]
+	case !strings.ContainsAny(lastLine, `"„«»`):
+		author = lastLine
+		resultQuote = resultQuote[:lastLineStartIndex]
+	}
+
+	return resultQuote, author
 }
