@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v5.29.3
-// source: api/proto/repository.proto
+// source: api/proto/api.proto
 
 package repository
 
@@ -19,11 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RepositoryService_PublishMeme_FullMethodName            = "/repository.RepositoryService/PublishMeme"
-	RepositoryService_GetTopLongMemes_FullMethodName        = "/repository.RepositoryService/GetTopLongMemes"
-	RepositoryService_SearchMemesBySubstring_FullMethodName = "/repository.RepositoryService/SearchMemesBySubstring"
-	RepositoryService_GetMemesByMonth_FullMethodName        = "/repository.RepositoryService/GetMemesByMonth"
-	RepositoryService_GetRandomMeme_FullMethodName          = "/repository.RepositoryService/GetRandomMeme"
+	RepositoryService_PublishMeme_FullMethodName            = "/api.RepositoryService/PublishMeme"
+	RepositoryService_GetTopLongMemes_FullMethodName        = "/api.RepositoryService/GetTopLongMemes"
+	RepositoryService_SearchMemesBySubstring_FullMethodName = "/api.RepositoryService/SearchMemesBySubstring"
+	RepositoryService_GetMemesByMonth_FullMethodName        = "/api.RepositoryService/GetMemesByMonth"
+	RepositoryService_GetRandomMeme_FullMethodName          = "/api.RepositoryService/GetRandomMeme"
 )
 
 // RepositoryServiceClient is the client API for RepositoryService service.
@@ -244,7 +244,7 @@ func _RepositoryService_GetRandomMeme_Handler(srv interface{}, ctx context.Conte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var RepositoryService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "repository.RepositoryService",
+	ServiceName: "api.RepositoryService",
 	HandlerType: (*RepositoryServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -269,5 +269,5 @@ var RepositoryService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "api/proto/repository.proto",
+	Metadata: "api/proto/api.proto",
 }

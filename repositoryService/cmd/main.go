@@ -1,193 +1,60 @@
 package main
 
 import (
-	"context"
-	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"gopkg.in/yaml.v3"
 	"log"
 	"log/slog"
-	"net"
-	"repositoryService/repository"
-	"time"
-
-	"google.golang.org/grpc"
+	"os"
+	"os/signal"
+	"repositoryService/internal/core/useCase"
+	"repositoryService/internal/lib/postgresclient"
+	"repositoryService/internal/lib/publishgrpcserver"
+	"repositoryService/internal/lib/searchgrpcserver"
+	"syscall"
 )
 
-const connection = "host=%s port=%s user=%s password=%s dbname=%s sslmode=%s"
+func loadConfig(path string) (*Config, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
 
-type RepositoryServiceServer struct {
-	repository.UnimplementedRepositoryServiceServer
-	db *pgxpool.Pool
+	var config Config
+	decoder := yaml.NewDecoder(file)
+	if err := decoder.Decode(&config); err != nil {
+		return nil, err
+	}
+
+	return &config, nil
 }
 
-func startGRPCServer(db *pgxpool.Pool) {
-	listener, err := net.Listen("tcp", ":50051")
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
-	grpcServer := grpc.NewServer()
-	repository.RegisterRepositoryServiceServer(grpcServer, &RepositoryServiceServer{db: db})
-
-	slog.Info("gRPC server started on port 50051")
-	if err := grpcServer.Serve(listener); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
-}
-
-func connectToDatabase() *pgxpool.Pool {
-	conString := fmt.Sprintf(connection, "postgres", "5432", "postgres", "postgres", "postgres", "disable")
-	conn, err := pgxpool.New(context.Background(), conString)
-	if err != nil {
-		log.Fatalf("failed to connect: %v", err)
-	}
-
-	createMemesTable(conn)
-	return conn
-}
-
-func createMemesTable(conn *pgxpool.Pool) {
-	query := `
-	CREATE TABLE IF NOT EXISTS memes (
-	    id SERIAL PRIMARY KEY,
-	    timestamp BIGINT NOT NULL,
-	    text TEXT NOT NULL
-	);`
-	_, err := conn.Exec(context.Background(), query)
-	if err != nil {
-		log.Fatalf("failed to connect: %v", err)
-	}
+type Config struct {
+	PublishGrpcServer publishgrpcserver.Config `yaml:"repository_service_publish"`
+	SearchGrpcServer  searchgrpcserver.Config  `yaml:"repository_service_search"`
+	PostgresClient    postgresclient.Config    `yaml:"postgresql"`
 }
 
 func main() {
-	db := connectToDatabase()
-	startGRPCServer(db)
-}
-
-func (s *RepositoryServiceServer) PublishMeme(
-	ctx context.Context,
-	req *repository.PublishMemeRequest,
-) (*repository.PublishMemeResponse, error) {
-	timestamp, err := time.Parse(time.RFC3339, req.Timestamp)
+	cfg, err := loadConfig("config.yml")
 	if err != nil {
-		slog.Error("timestamp parsing error", "error", err)
-		return &repository.PublishMemeResponse{Success: false}, err
+		log.Fatalf("Configuration loading error: %v", err)
 	}
 
-	query := "INSERT INTO memes (timestamp, text) VALUES ($1, $2)"
-	_, err = s.db.Exec(ctx, query, timestamp.Unix(), req.Text)
-	if err != nil {
-		slog.Error("insert error", "error", err)
-		return &repository.PublishMemeResponse{Success: false}, err
-	}
+	db := postgresclient.NewPostgresClient(cfg.PostgresClient)
+	searchGrpcServer := searchgrpcserver.NewSearchGrpcServer(cfg.SearchGrpcServer, db)
+	publishGrpcServer := publishgrpcserver.NewPublishGrpcServer(cfg.PublishGrpcServer, db)
+	uc := useCase.NewUseCase(searchGrpcServer, publishGrpcServer, &db)
 
-	slog.Info("new meme inserted:", "timestamp", req.Timestamp, "text", req.Text)
-	return &repository.PublishMemeResponse{Success: true}, nil
-}
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
-func (s *RepositoryServiceServer) GetTopLongMemes(
-	ctx context.Context,
-	req *repository.TopLongMemesRequest,
-) (*repository.MemesResponse, error) {
-	query := "SELECT timestamp, text FROM memes ORDER BY LENGTH(text) DESC LIMIT $1"
-	rows, err := s.db.Query(ctx, query, req.Limit)
-	if err != nil {
-		slog.Error("getting top long memes error", "error", err)
-		return nil, err
-	}
-	defer rows.Close()
+	defer uc.CloseDB()
 
-	var memes []*repository.MemeResponse
-	for rows.Next() {
-		var timestamp int64
-		var text string
-		if err := rows.Scan(&timestamp, &text); err != nil {
-			return nil, err
-		}
-		memes = append(memes, &repository.MemeResponse{
-			Text:      text,
-			Timestamp: fmt.Sprintf("%d", timestamp),
-		})
-	}
-	return &repository.MemesResponse{Memes: memes}, nil
-}
+	slog.Info("Service started...")
 
-func (s *RepositoryServiceServer) SearchMemesBySubstring(
-	ctx context.Context,
-	req *repository.SearchRequest,
-) (*repository.MemesResponse, error) {
-	query := "SELECT timestamp, text FROM memes WHERE text ILIKE '%' || $1 || '%'"
-	rows, err := s.db.Query(ctx, query, req.Query)
-	if err != nil {
-		slog.Error("finding meme error", "error", err)
-		return nil, err
-	}
-	defer rows.Close()
+	<-sigChan
+	slog.Info("The completion signal is received, turning off the service...")
 
-	var memes []*repository.MemeResponse
-	for rows.Next() {
-		var timestamp int64
-		var text string
-		if err := rows.Scan(&timestamp, &text); err != nil {
-			return nil, err
-		}
-		memes = append(memes, &repository.MemeResponse{
-			Text:      text,
-			Timestamp: fmt.Sprintf("%d", timestamp),
-		})
-	}
-	return &repository.MemesResponse{Memes: memes}, nil
-}
-
-func (s *RepositoryServiceServer) GetMemesByMonth(
-	ctx context.Context,
-	req *repository.MonthRequest,
-) (*repository.MemesResponse, error) {
-	year := int(req.Year)
-	month := time.Month(req.Month)
-	startTime := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC).Unix()
-	endTime := time.Date(year, month+1, 1, 0, 0, 0, 0, time.UTC).Unix()
-
-	query := "SELECT timestamp, text FROM memes WHERE timestamp >= $1 AND timestamp < $2"
-	rows, err := s.db.Query(ctx, query, startTime, endTime)
-	if err != nil {
-		slog.Error("getting memes by moths error", "error", err)
-		return nil, err
-	}
-	defer rows.Close()
-
-	var memes []*repository.MemeResponse
-	for rows.Next() {
-		var timestamp int64
-		var text string
-		if err := rows.Scan(&timestamp, &text); err != nil {
-			return nil, err
-		}
-		memes = append(memes, &repository.MemeResponse{
-			Text:      text,
-			Timestamp: fmt.Sprintf("%d", timestamp),
-		})
-	}
-	return &repository.MemesResponse{Memes: memes}, nil
-}
-
-func (s *RepositoryServiceServer) GetRandomMeme(
-	ctx context.Context,
-	req *repository.Empty,
-) (*repository.MemeResponse, error) {
-	query := "SELECT timestamp, text FROM memes ORDER BY RANDOM() LIMIT 1"
-	row := s.db.QueryRow(ctx, query)
-
-	var timestamp int64
-	var text string
-	err := row.Scan(&timestamp, &text)
-	if err != nil {
-		slog.Error("getting random meme error", "error", err)
-		return nil, err
-	}
-
-	return &repository.MemeResponse{
-		Text:      text,
-		Timestamp: fmt.Sprintf("%d", timestamp),
-	}, nil
+	slog.Info("The service has been stopped")
 }

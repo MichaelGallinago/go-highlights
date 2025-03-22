@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS memes (
+   id SERIAL PRIMARY KEY,
+   timestamp BIGINT NOT NULL,
+   text TEXT NOT NULL
+);
