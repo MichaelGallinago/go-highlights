@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package api;
+
+option go_package = "repository/search/";
+
+service RepositoryServiceSearch {
+  rpc GetTopLongMemes(TopLongMemesRequest) returns (MemesResponse);
+  rpc SearchMemesBySubstring(SearchRequest) returns (MemesResponse);
+  rpc GetMemesByMonth(MonthRequest) returns (MemesResponse);
+  rpc GetRandomMeme(Empty) returns (MemeResponse);
+}
+
+message TopLongMemesRequest {
+  int32 limit = 1;
+}
+
+message SearchRequest {
+  string query = 1;
+}
+
+message MonthRequest {
+  int32 year = 1;
+  int32 month = 2;
+}
+
+message MemeResponse {
+  string timestamp = 1;
+  string text = 2;
+}
+
+message MemesResponse {
+  repeated MemeResponse memes = 1;
+}
+
+message Empty {}
