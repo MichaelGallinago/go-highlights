@@ -47,7 +47,7 @@ func runMigrations(pool *pgxpool.Pool) error {
 		return err
 	}
 
-	m, err := migrate.NewWithDatabaseInstance("file:///db/migrations", "postgres", driver)
+	m, err := migrate.NewWithDatabaseInstance("file://migrations", "postgres", driver)
 	if err != nil {
 		return err
 	}
