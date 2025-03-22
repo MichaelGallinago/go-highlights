@@ -1,0 +1,10 @@
+repository_service:
+  network: "tcp"
+  port: 50051
+postgresql:
+  host: "postgres"
+  port: 5432
+  user: "postgres"
+  password: "postgres"
+  dbname: "postgres"
+  sslmode: "disable"
