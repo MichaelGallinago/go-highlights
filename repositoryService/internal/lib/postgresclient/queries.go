@@ -3,6 +3,7 @@ package postgresclient
 import (
 	"context"
 	"repositoryService/internal/core/entity"
+	"time"
 )
 
 // InsertMeme добавляет мем в БД
@@ -24,9 +25,12 @@ func (db *PostgresClient) GetTopLongMemes(ctx context.Context, limit int) ([]ent
 	var memes []entity.Meme
 	for rows.Next() {
 		var meme entity.Meme
-		if err := rows.Scan(&meme.Timestamp, &meme.Text); err != nil {
+		var timestampInt int64
+		if err := rows.Scan(&timestampInt, &meme.Text); err != nil {
 			return nil, err
 		}
+
+		meme.Timestamp = time.Unix(timestampInt, 0)
 		memes = append(memes, meme)
 	}
 	return memes, nil
