@@ -26,8 +26,19 @@ services:
         - "50051:50051"
         - "50052:50052"
       depends_on:
-        - rabbit
-        - postgres
+        rabbit:
+          condition: service_healthy
+        postgres:
+          condition: service_healthy
+
+  requesterservice:
+    build:
+      context: requesterService
+    ports:
+      - "50053:50053"
+    depends_on:
+      repositoryservice:
+        condition: service_healthy
 
   telegram_bot:
     build:
