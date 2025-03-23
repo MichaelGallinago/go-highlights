@@ -15,4 +15,6 @@ FROM alpine:latest
 COPY --from=builder /app/parseService /parseService
 COPY --from=builder /app/config.yml /config.yml
 
+EXPOSE 50053
+
 CMD ["./parseService"]

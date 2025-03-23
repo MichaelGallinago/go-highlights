@@ -1,15 +1,13 @@
 package main
 
 import (
-	"context"
-	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v3"
 	"log/slog"
 	"os"
 	"os/signal"
-	"parseService/internal/core/useCase"
-	"parseService/internal/lib/grpcclient"
-	"parseService/internal/lib/rabbitclient"
+	"requesterService/internal/core/useCase"
+	"requesterService/internal/lib/grpcclient"
+	"requesterService/internal/lib/grpcserver"
 	"syscall"
 )
 
@@ -30,13 +28,11 @@ func loadConfig(path string) (*Config, error) {
 }
 
 type Config struct {
-	RepositoryService grpcclient.Config   `yaml:"repository_service"`
-	Rabbit            rabbitclient.Config `yaml:"rabbit"`
+	RepositoryService grpcclient.Config `yaml:"repository_service"`
+	RequesterService  grpcserver.Config `yaml:"requester_service"`
 }
 
 func main() {
-	gin.SetMode(gin.DebugMode)
-
 	cfg, err := loadConfig("config.yml")
 	if err != nil {
 		slog.Error("Ошибка загрузки конфигурации:", err)
@@ -44,26 +40,16 @@ func main() {
 	}
 
 	memeClient := grpcclient.NewGrpcMemeClient(cfg.RepositoryService)
-	requesterServer := rabbitclient.NewRabbitClient(cfg.Rabbit)
-	uc := useCase.NewUseCase(memeClient, notificationClient)
-
-	ctx, cancel := context.WithCancel(context.Background())
+	requesterServer := grpcserver.NewSearchGrpcServer(cfg.RequesterService, memeClient)
+	_ = useCase.NewUseCase(memeClient, requesterServer)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-
-	go func() {
-		if err := uc.StartMessageListening(ctx); err != nil {
-			slog.Error("Ошибка во время прослушивания сообщений:", err)
-		}
-	}()
 
 	slog.Info("Сервис запущен и слушает сообщения...")
 
 	<-sigChan
 	slog.Info("Получен сигнал завершения, выключаем сервис...")
-
-	cancel()
 
 	slog.Info("Сервис остановлен")
 }

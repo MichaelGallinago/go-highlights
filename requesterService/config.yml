@@ -1,9 +1,6 @@
 repository_service:
   host: "repositoryservice"
-  port: 50051
-rabbit:
-  login: "guest"
-  password: "guest"
-  host: "rabbit"
-  port: "5672"
-  channel: "messages"
+  port: 50052
+requester_service:
+  network: "tcp"
+  port: 50053

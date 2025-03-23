@@ -6,8 +6,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
-	"parseService/internal/core/entity"
-	repository "parseService/repository/api"
+	"requesterService/repository/api"
 	"sync"
 )
 
@@ -15,7 +14,7 @@ type GrpcMemeClient struct {
 	conns *sync.Pool
 }
 
-func NewGrpcMemeClient(config Config) GrpcMemeClient {
+func NewGrpcMemeClient(config Config) *GrpcMemeClient {
 	pool := &sync.Pool{
 		New: func() interface{} {
 			conn, err := grpc.NewClient(
@@ -23,26 +22,78 @@ func NewGrpcMemeClient(config Config) GrpcMemeClient {
 				grpc.WithTransportCredentials(insecure.NewCredentials()),
 			)
 			if err != nil {
-				slog.Error("Ошибка gRPC-подключения: ", err)
+				slog.Error("gRPC-connection error: ", err)
 			}
 			return conn
 		},
 	}
 
-	return GrpcMemeClient{conns: pool}
+	return &GrpcMemeClient{conns: pool}
 }
 
-func (c GrpcMemeClient) Publish(ctx context.Context, meme entity.Meme) error {
+// GetTopLongMemes возвращает мемы с самой большой длиной
+func (c *GrpcMemeClient) GetTopLongMemes(
+	ctx context.Context, limit int32,
+) (*search.MemesResponse, error) {
 	client := c.conns.Get().(*grpc.ClientConn)
 	defer c.conns.Put(client)
 
-	_, err := repository.NewRepositoryServiceSearchClient(client).PublishMeme(ctx, &repository.PublishMemeRequest{
-		Timestamp: meme.Timestamp.Format("2006-01-02T15:04:05Z"),
-		Text:      meme.Text,
+	response, err := search.NewRepositoryServiceSearchClient(client).GetTopLongMemes(ctx, &search.TopLongMemesRequest{
+		Limit: limit,
 	})
 	if err != nil {
-		slog.Error("Ошибка при отправке мема:", err)
+		slog.Error("Error on GetTopLongMemes: ", err)
 	}
 
-	return err
+	return response, err
+}
+
+// SearchMemesBySubstring ищет мемы по подстроке
+func (c *GrpcMemeClient) SearchMemesBySubstring(
+	ctx context.Context, query string,
+) (*search.MemesResponse, error) {
+	client := c.conns.Get().(*grpc.ClientConn)
+	defer c.conns.Put(client)
+
+	response, err := search.NewRepositoryServiceSearchClient(client).SearchMemesBySubstring(ctx, &search.SearchRequest{
+		Query: query,
+	})
+	if err != nil {
+		slog.Error("Error on SearchMemesBySubstring: ", err)
+	}
+
+	return response, err
+}
+
+// GetMemesByMonth возвращает мемы за указанный месяц
+func (c *GrpcMemeClient) GetMemesByMonth(
+	ctx context.Context, year int32, month int32,
+) (*search.MemesResponse, error) {
+	client := c.conns.Get().(*grpc.ClientConn)
+	defer c.conns.Put(client)
+
+	response, err := search.NewRepositoryServiceSearchClient(client).GetMemesByMonth(ctx, &search.MonthRequest{
+		Year:  year,
+		Month: month,
+	})
+	if err != nil {
+		slog.Error("Error on SearchMemesBySubstring: ", err)
+	}
+
+	return response, err
+}
+
+// GetRandomMeme возвращает случайный мем
+func (c *GrpcMemeClient) GetRandomMeme(
+	ctx context.Context,
+) (*search.MemeResponse, error) {
+	client := c.conns.Get().(*grpc.ClientConn)
+	defer c.conns.Put(client)
+
+	response, err := search.NewRepositoryServiceSearchClient(client).GetRandomMeme(ctx, &search.Empty{})
+	if err != nil {
+		slog.Error("Error on GetRandomMeme: ", err)
+	}
+
+	return response, err
 }
