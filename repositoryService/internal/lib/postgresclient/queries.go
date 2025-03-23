@@ -8,7 +8,12 @@ import (
 
 // InsertMeme добавляет мем в БД
 func (db *PostgresClient) InsertMeme(ctx context.Context, timestamp int64, text string) error {
-	query := "INSERT INTO memes (timestamp, text) VALUES ($1, $2)"
+	query := `
+INSERT INTO memes (timestamp, text) 
+VALUES ($1, $2) 
+ON CONFLICT (text) 
+DO UPDATE SET timestamp = EXCLUDED.timestamp
+`
 	_, err := db.Pool.Exec(ctx, query, timestamp, text)
 	return err
 }
