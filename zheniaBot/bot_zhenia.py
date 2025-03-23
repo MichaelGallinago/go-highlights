@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import os
-
 import grpc
 from aiogram import Bot, Dispatcher, types
 
@@ -14,70 +13,73 @@ GRPC_SERVER = os.getenv("ZHENIA_BOT_GRPC_SERVER")
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-stub = None
-
-
-async def init_grpc_stub():
-    global stub
-    channel = grpc.aio.insecure_channel(GRPC_SERVER)
-    stub = api_pb2_grpc.RequesterServiceStub(channel)
-
-
-def format_with_title(title: str, content: str) -> str:
-    return f"{title}\n\n{content or '⚠️ Нет данных.'}"
-
+stub: api_pb2_grpc.RequesterServiceStub = None
 
 def parse_month(month: str):
     months = {
         "январь": 1, "февраль": 2, "март": 3, "апрель": 4, "май": 5, "июнь": 6,
         "июль": 7, "август": 8, "сентябрь": 9, "октябрь": 10, "ноябрь": 11, "декабрь": 12
     }
-    return months.get(month.lower())
+    return months.get(month.lower(), None)
 
 
-async def handle_highlight_month(message: types.Message, month_name: str):
-    month_num = parse_month(month_name)
+def format_with_title(title: str, content: str) -> str:
+    content = content.strip() if content else ""
+    return f"{title}\n\n{content or '⚠️ Нет данных.'}"
+
+
+def split_text(text: str, max_length: int = 4096) -> list[str]:
+    lines = text.split('\n')
+    chunks = []
+    current = ""
+    for line in lines:
+        if len(current) + len(line) + 1 <= max_length:
+            current += line + '\n'
+        else:
+            chunks.append(current.strip())
+            current = line + '\n'
+    if current:
+        chunks.append(current.strip())
+    return chunks
+
+
+async def safe_send_message(message: types.Message, text: str, parse_mode="Markdown"):
+    for chunk in split_text(text, max_length=4096):
+        await message.answer(chunk, parse_mode=parse_mode)
+
+
+async def handle_highlight_month(message: types.Message, arg: str):
+    month_num = parse_month(arg)
     if not month_num:
         await message.answer("❌ Неверное название месяца! Введите, например: январь, февраль, март...")
         return
 
-    try:
-        response = await stub.GetMemesByMonth(api_pb2.MonthHighlightRequest(month=month_num))
-        title = f"📅 *Хайлайты за месяц:* _{month_name.capitalize()}_"
-        await message.answer(format_with_title(title, response.text), parse_mode="Markdown")
-    except grpc.aio.AioRpcError as e:
-        logging.error(f"gRPC error: {e.code()} - {e.details()}")
-        await message.answer("❌ Ошибка при вызове gRPC.")
+    request = api_pb2.MonthHighlightRequest(month=month_num)
+    response = await stub.GetMemesByMonth(request)
+
+    title = f"📅 *Мемы за месяц:* _{arg.capitalize()}_"
+    await safe_send_message(message, format_with_title(title, response.text))
 
 
-async def handle_highlight_word(message: types.Message, search_phrase: str):
-    try:
-        response = await stub.SearchMemesBySubstring(api_pb2.SearchHighlightRequest(query=search_phrase))
-        title = f"🔍 *Поиск по фразе:* _{search_phrase}_"
-        await message.answer(format_with_title(title, response.text), parse_mode="Markdown")
-    except grpc.aio.AioRpcError as e:
-        logging.error(f"gRPC error: {e.code()} - {e.details()}")
-        await message.answer("❌ Ошибка при вызове gRPC.")
+async def handle_highlight_word(message: types.Message, query: str):
+    request = api_pb2.SearchHighlightRequest(query=query)
+    response = await stub.SearchMemesBySubstring(request)
+
+    title = f"🔍 *Поиск по фразе:* _{query}_"
+    await safe_send_message(message, format_with_title(title, response.text))
 
 
 async def handle_highlight_random(message: types.Message):
-    try:
-        response = await stub.GetRandomMeme(api_pb2.EmptyHighlightRequest())
-        title = "🎲 *Случайный хайлайт*"
-        await message.answer(format_with_title(title, response.text), parse_mode="Markdown")
-    except grpc.aio.AioRpcError as e:
-        logging.error(f"gRPC error: {e.code()} - {e.details()}")
-        await message.answer("❌ Ошибка при вызове gRPC.")
+    response = await stub.GetRandomMeme(api_pb2.EmptyHighlightRequest())
+    title = "🎲 *Случайный хайлайт*"
+    await safe_send_message(message, format_with_title(title, response.text))
 
 
 async def handle_highlight_top5(message: types.Message):
-    try:
-        response = await stub.GetTopLongMemes(api_pb2.TopLongMemesHighlightRequest(limit=5))
-        title = "🏆 *ТОП-5 самых длинных хайлайтов*"
-        await message.answer(format_with_title(title, response.text), parse_mode="Markdown")
-    except grpc.aio.AioRpcError as e:
-        logging.error(f"gRPC error: {e.code()} - {e.details()}")
-        await message.answer("❌ Ошибка при вызове gRPC.")
+    request = api_pb2.TopLongMemesHighlightRequest(limit=5)
+    response = await stub.GetTopLongMemes(request)
+    title = "🏆 *ТОП-5 самых длинных мемов:*"
+    await safe_send_message(message, format_with_title(title, response.text))
 
 
 @dp.message()
@@ -93,7 +95,7 @@ async def handle_commands(message: types.Message):
 
     elif command == "/highlight_word":
         if len(args) < 2:
-            await message.answer("❌ Введите слово или фразу! Пример: /highlight_word 1с")
+            await message.answer("❌ Введите слово или фразу! Пример: /highlight_word важная новость")
             return
         await handle_highlight_word(message, args[1])
 
@@ -112,8 +114,10 @@ async def handle_commands(message: types.Message):
 
 
 async def main():
+    global stub
     logging.basicConfig(level=logging.INFO)
-    await init_grpc_stub()
+    channel = grpc.aio.insecure_channel(GRPC_SERVER)
+    stub = api_pb2_grpc.RequesterServiceStub(channel)
     await dp.start_polling(bot)
 
 
