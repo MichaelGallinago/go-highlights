@@ -2,6 +2,7 @@ package grpcserver
 
 import (
 	"context"
+	"fmt"
 	"google.golang.org/grpc"
 	"log"
 	"log/slog"
@@ -10,6 +11,7 @@ import (
 	"requesterService/repository/api"
 	"requesterService/requester"
 	"strconv"
+	"strings"
 )
 
 type GrpcServer struct {
@@ -41,69 +43,60 @@ func NewSearchGrpcServer(config Config, memeClient *grpcclient.GrpcMemeClient) *
 // GetTopLongMemes возвращает мемы с самой большой длиной
 func (s *GrpcServer) GetTopLongMemes(
 	ctx context.Context, req *requester.TopLongMemesRequest,
-) (*requester.MemesResponse, error) {
+) (*requester.HighlightResponse, error) {
 	memes, err := s.MemeClient.GetTopLongMemes(ctx, req.Limit)
 	if err != nil {
 		slog.Error("getting top long memes error", "error", err)
 		return nil, err
 	}
 
-	return &requester.MemesResponse{Memes: convertMemeResponses(memes.Memes)}, nil
+	return &requester.HighlightResponse{Text: formatMemesResponse("Топ длинных мемов", memes)}, nil
 }
 
 // SearchMemesBySubstring ищет мемы по подстроке
 func (s *GrpcServer) SearchMemesBySubstring(
 	ctx context.Context, req *requester.SearchRequest,
-) (*requester.MemesResponse, error) {
+) (*requester.HighlightResponse, error) {
 	memes, err := s.MemeClient.SearchMemesBySubstring(ctx, req.Query)
 	if err != nil {
 		slog.Error("getting memes by substring error", "error", err)
 		return nil, err
 	}
 
-	return &requester.MemesResponse{Memes: convertMemeResponses(memes.Memes)}, nil
+	return &requester.HighlightResponse{Text: formatMemesResponse("Результаты поиска мемов", memes)}, nil
 }
 
 // GetMemesByMonth возвращает мемы за указанный месяц
 func (s *GrpcServer) GetMemesByMonth(
 	ctx context.Context, req *requester.MonthRequest,
-) (*requester.MemesResponse, error) {
+) (*requester.HighlightResponse, error) {
 	memes, err := s.MemeClient.GetMemesByMonth(ctx, req.Year, req.Month)
 	if err != nil {
 		slog.Error("getting memes by month error", "error", err)
 		return nil, err
 	}
 
-	return &requester.MemesResponse{Memes: convertMemeResponses(memes.Memes)}, nil
+	return &requester.HighlightResponse{Text: formatMemesResponse("Мемы за месяц", memes)}, nil
 }
 
 // GetRandomMeme возвращает случайный мем
 func (s *GrpcServer) GetRandomMeme(
 	ctx context.Context, req *requester.Empty,
-) (*requester.MemeResponse, error) {
+) (*requester.HighlightResponse, error) {
 	meme, err := s.MemeClient.GetRandomMeme(ctx)
 	if err != nil {
 		slog.Error("getting random meme error", "error", err)
 		return nil, err
 	}
 
-	return &requester.MemeResponse{
-		Text:      meme.Text,
-		Timestamp: meme.Timestamp,
-	}, nil
+	memes := &search.MemesResponse{Memes: []*search.MemeResponse{meme}}
+	return &requester.HighlightResponse{Text: formatMemesResponse("Случайный мем", memes)}, nil
 }
 
-func convertMemeResponses(source []*search.MemeResponse) []*requester.MemeResponse {
-	target := make([]*requester.MemeResponse, len(source))
-	for i, meme := range source {
-		if meme == nil {
-			continue
-		}
-
-		target[i] = &requester.MemeResponse{
-			Timestamp: meme.Timestamp,
-			Text:      meme.Text,
-		}
+func formatMemesResponse(title string, memes *search.MemesResponse) string {
+	var texts []string
+	for _, meme := range memes.Memes {
+		texts = append(texts, meme.Text)
 	}
-	return target
+	return fmt.Sprintf("%s:\n%s", title, strings.Join(texts, "\n\n"))
 }
