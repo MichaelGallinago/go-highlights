@@ -11,7 +11,6 @@ import (
 	"repositoryService/internal/lib/postgresclient"
 	"repositoryService/repository/search"
 	"strconv"
-	"time"
 )
 
 type SearchGrpcServer struct {
@@ -66,17 +65,10 @@ func (s *SearchGrpcServer) SearchMemesBySubstring(
 	return mapMemesToResponse(memes), nil
 }
 
-// GetMemesByMonth возвращает мемы за указанный месяц
 func (s *SearchGrpcServer) GetMemesByMonth(
 	ctx context.Context, req *search.MonthRequest,
 ) (*search.MemesResponse, error) {
-	year := int(req.Year)
-	month := time.Month(req.Month)
-
-	startTime := time.Date(year, month, 1, 0, 0, 0, 0, time.UTC).Unix()
-	endTime := time.Date(year, month+1, 1, 0, 0, 0, 0, time.UTC).Unix()
-
-	memes, err := s.DB.GetMemesByMonth(ctx, startTime, endTime)
+	memes, err := s.DB.GetMemesByMonth(ctx, req.Month)
 	if err != nil {
 		slog.Error("getting memes by month error", "error", err)
 		return nil, err

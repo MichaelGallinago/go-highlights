@@ -37,7 +37,7 @@ type DB interface {
 	SearchMemes(ctx context.Context, query string) ([]entity.Meme, error)
 
 	// GetMemesByMonth возвращает мемы за указанный период (месяц)
-	GetMemesByMonth(ctx context.Context, startTime, endTime int64) ([]entity.Meme, error)
+	GetMemesByMonth(ctx context.Context, month int32) ([]entity.Meme, error)
 
 	// GetRandomMeme возвращает случайный мем
 	GetRandomMeme(ctx context.Context) (entity.Meme, error)

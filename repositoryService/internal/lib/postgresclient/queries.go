@@ -53,9 +53,9 @@ func (db *PostgresClient) SearchMemes(ctx context.Context, query string) ([]enti
 }
 
 // GetMemesByMonth возвращает мемы за указанный период (месяц)
-func (db *PostgresClient) GetMemesByMonth(ctx context.Context, startTime, endTime int64) ([]entity.Meme, error) {
-	query := "SELECT timestamp, text FROM memes WHERE timestamp >= $1 AND timestamp < $2"
-	rows, err := db.Pool.Query(ctx, query, startTime, endTime)
+func (db *PostgresClient) GetMemesByMonth(ctx context.Context, month int32) ([]entity.Meme, error) {
+	query := `SELECT timestamp, text FROM memes WHERE EXTRACT(MONTH FROM TO_TIMESTAMP(timestamp)) = $1`
+	rows, err := db.Pool.Query(ctx, query, month)
 	if err != nil {
 		return nil, err
 	}

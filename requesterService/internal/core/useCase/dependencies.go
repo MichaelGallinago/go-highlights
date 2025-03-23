@@ -14,7 +14,7 @@ type MemeClient interface {
 	SearchMemesBySubstring(ctx context.Context, query string) (*search.MemesResponse, error)
 
 	// GetMemesByMonth возвращает мемы за указанный месяц
-	GetMemesByMonth(ctx context.Context, year int32, month int32) (*search.MemesResponse, error)
+	GetMemesByMonth(ctx context.Context, month int32) (*search.MemesResponse, error)
 
 	// GetRandomMeme возвращает случайный мем
 	GetRandomMeme(ctx context.Context) (*search.MemeResponse, error)

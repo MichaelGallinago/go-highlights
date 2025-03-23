@@ -70,7 +70,7 @@ func (s *GrpcServer) SearchMemesBySubstring(
 func (s *GrpcServer) GetMemesByMonth(
 	ctx context.Context, req *requester.MonthRequest,
 ) (*requester.HighlightResponse, error) {
-	memes, err := s.MemeClient.GetMemesByMonth(ctx, req.Year, req.Month)
+	memes, err := s.MemeClient.GetMemesByMonth(ctx, req.Month)
 	if err != nil {
 		slog.Error("getting memes by month error", "error", err)
 		return nil, err

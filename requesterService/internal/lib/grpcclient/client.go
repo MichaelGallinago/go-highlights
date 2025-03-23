@@ -67,13 +67,12 @@ func (c *GrpcMemeClient) SearchMemesBySubstring(
 
 // GetMemesByMonth возвращает мемы за указанный месяц
 func (c *GrpcMemeClient) GetMemesByMonth(
-	ctx context.Context, year int32, month int32,
+	ctx context.Context, month int32,
 ) (*search.MemesResponse, error) {
 	client := c.conns.Get().(*grpc.ClientConn)
 	defer c.conns.Put(client)
 
 	response, err := search.NewRepositoryServiceSearchClient(client).GetMemesByMonth(ctx, &search.MonthRequest{
-		Year:  year,
 		Month: month,
 	})
 	if err != nil {
