@@ -22,14 +22,14 @@ type MemeClient interface {
 
 type RequesterServer interface {
 	// GetTopLongMemes возвращает мемы с самой большой длиной
-	GetTopLongMemes(ctx context.Context, req *requester.TopLongMemesRequest) (*requester.MemesResponse, error)
+	GetTopLongMemes(ctx context.Context, req *requester.TopLongMemesRequest) (*requester.HighlightResponse, error)
 
 	// SearchMemesBySubstring ищет мемы по подстроке
-	SearchMemesBySubstring(ctx context.Context, req *requester.SearchRequest) (*requester.MemesResponse, error)
+	SearchMemesBySubstring(ctx context.Context, req *requester.SearchRequest) (*requester.HighlightResponse, error)
 
 	// GetMemesByMonth возвращает мемы за указанный месяц
-	GetMemesByMonth(ctx context.Context, req *requester.MonthRequest) (*requester.MemesResponse, error)
+	GetMemesByMonth(ctx context.Context, req *requester.MonthRequest) (*requester.HighlightResponse, error)
 
 	// GetRandomMeme возвращает случайный мем
-	GetRandomMeme(ctx context.Context, req *requester.Empty) (*requester.MemeResponse, error)
+	GetRandomMeme(ctx context.Context, req *requester.Empty) (*requester.HighlightResponse, error)
 }
