@@ -6,7 +6,7 @@ import json
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message
 
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TOKEN = os.getenv("TELEGRAM_STEPA_BOT_TOKEN")
 RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "rabbit")
 QUEUE_NAME = os.getenv("RABBITMQ_QUEUE", "messages")
 

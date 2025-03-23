@@ -39,7 +39,7 @@ services:
     depends_on:
       - repositoryservice
 
-  telegram_bot:
+  telegram_bot_stepa:
     build:
       context: stepStepichBot
     depends_on:
@@ -48,6 +48,15 @@ services:
     env_file:
       - .env
 
+  telegram_bot_zhenia:
+    build:
+      context: zheniaBot
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    env_file:
+      - .env
+  
   postgres:
     image: postgres:latest
     environment:
