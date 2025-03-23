@@ -2,7 +2,6 @@ package grpcserver
 
 import (
 	"context"
-	"fmt"
 	"google.golang.org/grpc"
 	"log"
 	"log/slog"
@@ -50,7 +49,7 @@ func (s *GrpcServer) GetTopLongMemes(
 		return nil, err
 	}
 
-	return &requester.HighlightResponse{Text: formatMemesResponse("Топ длинных мемов", memes)}, nil
+	return &requester.HighlightResponse{Text: formatMemesResponse(memes)}, nil
 }
 
 // SearchMemesBySubstring ищет мемы по подстроке
@@ -63,7 +62,7 @@ func (s *GrpcServer) SearchMemesBySubstring(
 		return nil, err
 	}
 
-	return &requester.HighlightResponse{Text: formatMemesResponse("Результаты поиска мемов", memes)}, nil
+	return &requester.HighlightResponse{Text: formatMemesResponse(memes)}, nil
 }
 
 // GetMemesByMonth возвращает мемы за указанный месяц
@@ -76,7 +75,7 @@ func (s *GrpcServer) GetMemesByMonth(
 		return nil, err
 	}
 
-	return &requester.HighlightResponse{Text: formatMemesResponse("Мемы за месяц", memes)}, nil
+	return &requester.HighlightResponse{Text: formatMemesResponse(memes)}, nil
 }
 
 // GetRandomMeme возвращает случайный мем
@@ -90,13 +89,13 @@ func (s *GrpcServer) GetRandomMeme(
 	}
 
 	memes := &search.MemesResponse{Memes: []*search.MemeResponse{meme}}
-	return &requester.HighlightResponse{Text: formatMemesResponse("Случайный мем", memes)}, nil
+	return &requester.HighlightResponse{Text: formatMemesResponse(memes)}, nil
 }
 
-func formatMemesResponse(title string, memes *search.MemesResponse) string {
+func formatMemesResponse(memes *search.MemesResponse) string {
 	var texts []string
 	for _, meme := range memes.Memes {
 		texts = append(texts, meme.Text)
 	}
-	return fmt.Sprintf("%s:\n%s", title, strings.Join(texts, "\n\n"))
+	return strings.Join(texts, "\n\n")
 }
