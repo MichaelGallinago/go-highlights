@@ -37,8 +37,7 @@ services:
     ports:
       - "50053:50053"
     depends_on:
-      repositoryservice:
-        condition: service_healthy
+      - repositoryservice
 
   telegram_bot:
     build:

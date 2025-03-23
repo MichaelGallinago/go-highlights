@@ -29,10 +29,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RequesterServiceClient interface {
-	GetTopLongMemes(ctx context.Context, in *TopLongMemesRequest, opts ...grpc.CallOption) (*HighlightResponse, error)
-	SearchMemesBySubstring(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*HighlightResponse, error)
-	GetMemesByMonth(ctx context.Context, in *MonthRequest, opts ...grpc.CallOption) (*HighlightResponse, error)
-	GetRandomMeme(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HighlightResponse, error)
+	GetTopLongMemes(ctx context.Context, in *TopLongMemesHighlightRequest, opts ...grpc.CallOption) (*HighlightResponse, error)
+	SearchMemesBySubstring(ctx context.Context, in *SearchHighlightRequest, opts ...grpc.CallOption) (*HighlightResponse, error)
+	GetMemesByMonth(ctx context.Context, in *MonthHighlightRequest, opts ...grpc.CallOption) (*HighlightResponse, error)
+	GetRandomMeme(ctx context.Context, in *EmptyHighlightRequest, opts ...grpc.CallOption) (*HighlightResponse, error)
 }
 
 type requesterServiceClient struct {
@@ -43,7 +43,7 @@ func NewRequesterServiceClient(cc grpc.ClientConnInterface) RequesterServiceClie
 	return &requesterServiceClient{cc}
 }
 
-func (c *requesterServiceClient) GetTopLongMemes(ctx context.Context, in *TopLongMemesRequest, opts ...grpc.CallOption) (*HighlightResponse, error) {
+func (c *requesterServiceClient) GetTopLongMemes(ctx context.Context, in *TopLongMemesHighlightRequest, opts ...grpc.CallOption) (*HighlightResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(HighlightResponse)
 	err := c.cc.Invoke(ctx, RequesterService_GetTopLongMemes_FullMethodName, in, out, cOpts...)
@@ -53,7 +53,7 @@ func (c *requesterServiceClient) GetTopLongMemes(ctx context.Context, in *TopLon
 	return out, nil
 }
 
-func (c *requesterServiceClient) SearchMemesBySubstring(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*HighlightResponse, error) {
+func (c *requesterServiceClient) SearchMemesBySubstring(ctx context.Context, in *SearchHighlightRequest, opts ...grpc.CallOption) (*HighlightResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(HighlightResponse)
 	err := c.cc.Invoke(ctx, RequesterService_SearchMemesBySubstring_FullMethodName, in, out, cOpts...)
@@ -63,7 +63,7 @@ func (c *requesterServiceClient) SearchMemesBySubstring(ctx context.Context, in 
 	return out, nil
 }
 
-func (c *requesterServiceClient) GetMemesByMonth(ctx context.Context, in *MonthRequest, opts ...grpc.CallOption) (*HighlightResponse, error) {
+func (c *requesterServiceClient) GetMemesByMonth(ctx context.Context, in *MonthHighlightRequest, opts ...grpc.CallOption) (*HighlightResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(HighlightResponse)
 	err := c.cc.Invoke(ctx, RequesterService_GetMemesByMonth_FullMethodName, in, out, cOpts...)
@@ -73,7 +73,7 @@ func (c *requesterServiceClient) GetMemesByMonth(ctx context.Context, in *MonthR
 	return out, nil
 }
 
-func (c *requesterServiceClient) GetRandomMeme(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*HighlightResponse, error) {
+func (c *requesterServiceClient) GetRandomMeme(ctx context.Context, in *EmptyHighlightRequest, opts ...grpc.CallOption) (*HighlightResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(HighlightResponse)
 	err := c.cc.Invoke(ctx, RequesterService_GetRandomMeme_FullMethodName, in, out, cOpts...)
@@ -87,10 +87,10 @@ func (c *requesterServiceClient) GetRandomMeme(ctx context.Context, in *Empty, o
 // All implementations must embed UnimplementedRequesterServiceServer
 // for forward compatibility.
 type RequesterServiceServer interface {
-	GetTopLongMemes(context.Context, *TopLongMemesRequest) (*HighlightResponse, error)
-	SearchMemesBySubstring(context.Context, *SearchRequest) (*HighlightResponse, error)
-	GetMemesByMonth(context.Context, *MonthRequest) (*HighlightResponse, error)
-	GetRandomMeme(context.Context, *Empty) (*HighlightResponse, error)
+	GetTopLongMemes(context.Context, *TopLongMemesHighlightRequest) (*HighlightResponse, error)
+	SearchMemesBySubstring(context.Context, *SearchHighlightRequest) (*HighlightResponse, error)
+	GetMemesByMonth(context.Context, *MonthHighlightRequest) (*HighlightResponse, error)
+	GetRandomMeme(context.Context, *EmptyHighlightRequest) (*HighlightResponse, error)
 	mustEmbedUnimplementedRequesterServiceServer()
 }
 
@@ -101,16 +101,16 @@ type RequesterServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRequesterServiceServer struct{}
 
-func (UnimplementedRequesterServiceServer) GetTopLongMemes(context.Context, *TopLongMemesRequest) (*HighlightResponse, error) {
+func (UnimplementedRequesterServiceServer) GetTopLongMemes(context.Context, *TopLongMemesHighlightRequest) (*HighlightResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTopLongMemes not implemented")
 }
-func (UnimplementedRequesterServiceServer) SearchMemesBySubstring(context.Context, *SearchRequest) (*HighlightResponse, error) {
+func (UnimplementedRequesterServiceServer) SearchMemesBySubstring(context.Context, *SearchHighlightRequest) (*HighlightResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchMemesBySubstring not implemented")
 }
-func (UnimplementedRequesterServiceServer) GetMemesByMonth(context.Context, *MonthRequest) (*HighlightResponse, error) {
+func (UnimplementedRequesterServiceServer) GetMemesByMonth(context.Context, *MonthHighlightRequest) (*HighlightResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMemesByMonth not implemented")
 }
-func (UnimplementedRequesterServiceServer) GetRandomMeme(context.Context, *Empty) (*HighlightResponse, error) {
+func (UnimplementedRequesterServiceServer) GetRandomMeme(context.Context, *EmptyHighlightRequest) (*HighlightResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRandomMeme not implemented")
 }
 func (UnimplementedRequesterServiceServer) mustEmbedUnimplementedRequesterServiceServer() {}
@@ -135,7 +135,7 @@ func RegisterRequesterServiceServer(s grpc.ServiceRegistrar, srv RequesterServic
 }
 
 func _RequesterService_GetTopLongMemes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TopLongMemesRequest)
+	in := new(TopLongMemesHighlightRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -147,13 +147,13 @@ func _RequesterService_GetTopLongMemes_Handler(srv interface{}, ctx context.Cont
 		FullMethod: RequesterService_GetTopLongMemes_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RequesterServiceServer).GetTopLongMemes(ctx, req.(*TopLongMemesRequest))
+		return srv.(RequesterServiceServer).GetTopLongMemes(ctx, req.(*TopLongMemesHighlightRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _RequesterService_SearchMemesBySubstring_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchRequest)
+	in := new(SearchHighlightRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -165,13 +165,13 @@ func _RequesterService_SearchMemesBySubstring_Handler(srv interface{}, ctx conte
 		FullMethod: RequesterService_SearchMemesBySubstring_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RequesterServiceServer).SearchMemesBySubstring(ctx, req.(*SearchRequest))
+		return srv.(RequesterServiceServer).SearchMemesBySubstring(ctx, req.(*SearchHighlightRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _RequesterService_GetMemesByMonth_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MonthRequest)
+	in := new(MonthHighlightRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -183,13 +183,13 @@ func _RequesterService_GetMemesByMonth_Handler(srv interface{}, ctx context.Cont
 		FullMethod: RequesterService_GetMemesByMonth_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RequesterServiceServer).GetMemesByMonth(ctx, req.(*MonthRequest))
+		return srv.(RequesterServiceServer).GetMemesByMonth(ctx, req.(*MonthHighlightRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _RequesterService_GetRandomMeme_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
+	in := new(EmptyHighlightRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func _RequesterService_GetRandomMeme_Handler(srv interface{}, ctx context.Contex
 		FullMethod: RequesterService_GetRandomMeme_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RequesterServiceServer).GetRandomMeme(ctx, req.(*Empty))
+		return srv.(RequesterServiceServer).GetRandomMeme(ctx, req.(*EmptyHighlightRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

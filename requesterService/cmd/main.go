@@ -35,7 +35,7 @@ type Config struct {
 func main() {
 	cfg, err := loadConfig("config.yml")
 	if err != nil {
-		slog.Error("Ошибка загрузки конфигурации:", err)
+		slog.Error("Configuration loading error:", err)
 		os.Exit(1)
 	}
 
@@ -46,10 +46,10 @@ func main() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
-	slog.Info("Сервис запущен и слушает сообщения...")
+	slog.Info("Service started...")
 
 	<-sigChan
-	slog.Info("Получен сигнал завершения, выключаем сервис...")
+	slog.Info("The completion signal is received, turning off the service...")
 
-	slog.Info("Сервис остановлен")
+	slog.Info("The service has been stopped")
 }

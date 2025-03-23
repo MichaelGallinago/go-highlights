@@ -5,26 +5,26 @@ package api;
 option go_package = "requester/";
 
 service RequesterService {
-  rpc GetTopLongMemes(TopLongMemesRequest) returns (HighlightResponse);
-  rpc SearchMemesBySubstring(SearchRequest) returns (HighlightResponse);
-  rpc GetMemesByMonth(MonthRequest) returns (HighlightResponse);
-  rpc GetRandomMeme(Empty) returns (HighlightResponse);
+  rpc GetTopLongMemes(TopLongMemesHighlightRequest) returns (HighlightResponse);
+  rpc SearchMemesBySubstring(SearchHighlightRequest) returns (HighlightResponse);
+  rpc GetMemesByMonth(MonthHighlightRequest) returns (HighlightResponse);
+  rpc GetRandomMeme(EmptyHighlightRequest) returns (HighlightResponse);
 }
 
-message TopLongMemesRequest {
+message TopLongMemesHighlightRequest {
   int32 limit = 1;
 }
 
-message SearchRequest {
+message SearchHighlightRequest {
   string query = 1;
 }
 
-message MonthRequest {
+message MonthHighlightRequest {
   int32 month = 1;
 }
+
+message EmptyHighlightRequest {}
 
 message HighlightResponse {
   string text = 1;
 }
-
-message Empty {}

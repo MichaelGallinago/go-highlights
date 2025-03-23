@@ -42,7 +42,7 @@ func NewSearchGrpcServer(config Config, memeClient *grpcclient.GrpcMemeClient) *
 
 // GetTopLongMemes возвращает мемы с самой большой длиной
 func (s *GrpcServer) GetTopLongMemes(
-	ctx context.Context, req *requester.TopLongMemesRequest,
+	ctx context.Context, req *requester.TopLongMemesHighlightRequest,
 ) (*requester.HighlightResponse, error) {
 	memes, err := s.MemeClient.GetTopLongMemes(ctx, req.Limit)
 	if err != nil {
@@ -55,7 +55,7 @@ func (s *GrpcServer) GetTopLongMemes(
 
 // SearchMemesBySubstring ищет мемы по подстроке
 func (s *GrpcServer) SearchMemesBySubstring(
-	ctx context.Context, req *requester.SearchRequest,
+	ctx context.Context, req *requester.SearchHighlightRequest,
 ) (*requester.HighlightResponse, error) {
 	memes, err := s.MemeClient.SearchMemesBySubstring(ctx, req.Query)
 	if err != nil {
@@ -68,7 +68,7 @@ func (s *GrpcServer) SearchMemesBySubstring(
 
 // GetMemesByMonth возвращает мемы за указанный месяц
 func (s *GrpcServer) GetMemesByMonth(
-	ctx context.Context, req *requester.MonthRequest,
+	ctx context.Context, req *requester.MonthHighlightRequest,
 ) (*requester.HighlightResponse, error) {
 	memes, err := s.MemeClient.GetMemesByMonth(ctx, req.Month)
 	if err != nil {
@@ -81,7 +81,7 @@ func (s *GrpcServer) GetMemesByMonth(
 
 // GetRandomMeme возвращает случайный мем
 func (s *GrpcServer) GetRandomMeme(
-	ctx context.Context, req *requester.Empty,
+	ctx context.Context, req *requester.EmptyHighlightRequest,
 ) (*requester.HighlightResponse, error) {
 	meme, err := s.MemeClient.GetRandomMeme(ctx)
 	if err != nil {
