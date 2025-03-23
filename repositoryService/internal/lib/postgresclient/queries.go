@@ -30,7 +30,7 @@ func (db *PostgresClient) GetTopLongMemes(ctx context.Context, limit int) ([]ent
 			return nil, err
 		}
 
-		meme.Timestamp = time.Unix(timestampInt, 0)
+		meme.Timestamp = toTime(timestampInt)
 		memes = append(memes, meme)
 	}
 	return memes, nil
@@ -48,9 +48,12 @@ func (db *PostgresClient) SearchMemes(ctx context.Context, query string) ([]enti
 	var memes []entity.Meme
 	for rows.Next() {
 		var meme entity.Meme
-		if err := rows.Scan(&meme.Timestamp, &meme.Text); err != nil {
+		var timestampInt int64
+		if err := rows.Scan(&timestampInt, &meme.Text); err != nil {
 			return nil, err
 		}
+
+		meme.Timestamp = toTime(timestampInt)
 		memes = append(memes, meme)
 	}
 	return memes, nil
@@ -68,9 +71,12 @@ func (db *PostgresClient) GetMemesByMonth(ctx context.Context, month int32) ([]e
 	var memes []entity.Meme
 	for rows.Next() {
 		var meme entity.Meme
-		if err := rows.Scan(&meme.Timestamp, &meme.Text); err != nil {
+		var timestampInt int64
+		if err := rows.Scan(&timestampInt, &meme.Text); err != nil {
 			return nil, err
 		}
+
+		meme.Timestamp = toTime(timestampInt)
 		memes = append(memes, meme)
 	}
 	return memes, nil
@@ -82,10 +88,16 @@ func (db *PostgresClient) GetRandomMeme(ctx context.Context) (entity.Meme, error
 	row := db.Pool.QueryRow(ctx, query)
 
 	var meme entity.Meme
-	err := row.Scan(&meme.Timestamp, &meme.Text)
+	var timestampInt int64
+	err := row.Scan(&timestampInt, &meme.Text)
 	if err != nil {
 		return entity.Meme{}, err
 	}
+	meme.Timestamp = toTime(timestampInt)
 
 	return meme, nil
+}
+
+func toTime(timestampInt int64) time.Time {
+	return time.Unix(timestampInt, 0)
 }
