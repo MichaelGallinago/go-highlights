@@ -24,17 +24,19 @@ func NewUseCase(memeClient MemeClient, notificationClient NotificationClient) Us
 func (uc UseCase) StartMessageListening(ctx context.Context) error {
 	log.Println("Начало прослушивания сообщений...")
 
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
 			log.Println("Остановка прослушивания сообщений.")
 			return ctx.Err()
-		default:
 
+		case <-ticker.C:
 			message, err := uc.notificationClient.GetMessage(ctx)
 			if err != nil {
 				log.Println("Ошибка при получении сообщения:", err)
-				time.Sleep(2 * time.Second)
 				continue
 			}
 

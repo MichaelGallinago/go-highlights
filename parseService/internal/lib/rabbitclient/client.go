@@ -64,11 +64,14 @@ func (r RabbitClient) GetMessage(ctx context.Context) (entity.Message, error) {
 
 	select {
 	case msg := <-msgs:
-		var message entity.Message
+		var message entity.MessageEvent
 		if err := json.Unmarshal(msg.Body, &message); err != nil {
 			return entity.Message{}, fmt.Errorf("ошибка парсинга JSON: %w", err)
 		}
-		return message, nil
+		return entity.Message{
+			Timestamp: message.Timestamp,
+			Text:      message.Text,
+		}, nil
 	case <-ctx.Done():
 		return entity.Message{}, ctx.Err()
 	}
