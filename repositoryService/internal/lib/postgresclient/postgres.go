@@ -10,27 +10,35 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"log"
+	"sync"
 )
 
 type PostgresClient struct {
 	Pool *pgxpool.Pool
 }
 
-func NewPostgresClient(config Config) PostgresClient {
-	conString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		config.Host, config.Port, config.User, config.Password, config.DbName, config.SslMode)
+var (
+	Instance PostgresClient
+	once     sync.Once
+)
 
-	pool, err := pgxpool.New(context.Background(), conString)
-	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
-	}
+func InitPostgresClient(config Config) {
+	once.Do(func() {
+		conString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+			config.Host, config.Port, config.User, config.Password, config.DbName, config.SslMode)
 
-	err = runMigrations(pool)
-	if err != nil {
-		log.Fatalf("Migration failed: %v", err)
-	}
+		pool, err := pgxpool.New(context.Background(), conString)
+		if err != nil {
+			log.Fatalf("failed to connect to database: %v", err)
+		}
 
-	return PostgresClient{Pool: pool}
+		err = runMigrations(pool)
+		if err != nil {
+			log.Fatalf("Migration failed: %v", err)
+		}
+
+		Instance = PostgresClient{Pool: pool}
+	})
 }
 
 func runMigrations(pool *pgxpool.Pool) error {

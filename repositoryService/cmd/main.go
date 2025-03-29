@@ -41,10 +41,12 @@ func main() {
 		log.Fatalf("Configuration loading error: %v", err)
 	}
 
-	db := postgresclient.NewPostgresClient(cfg.PostgresClient)
-	searchGrpcServer := searchgrpcserver.NewSearchGrpcServer(cfg.SearchGrpcServer, db)
-	publishGrpcServer := publishgrpcserver.NewPublishGrpcServer(cfg.PublishGrpcServer, db)
-	uc := useCase.NewUseCase(searchGrpcServer, publishGrpcServer, &db)
+	postgresclient.InitPostgresClient(cfg.PostgresClient)
+
+	uc := useCase.NewUseCase(
+		searchgrpcserver.NewSearchGrpcServer(cfg.SearchGrpcServer),
+		publishgrpcserver.NewPublishGrpcServer(cfg.PublishGrpcServer),
+	)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)

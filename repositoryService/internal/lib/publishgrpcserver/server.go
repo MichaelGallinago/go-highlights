@@ -18,7 +18,7 @@ type PublishGrpcServer struct {
 }
 
 // NewPublishGrpcServer запускает gRPC сервер
-func NewPublishGrpcServer(config Config, db postgresclient.PostgresClient) *PublishGrpcServer {
+func NewPublishGrpcServer(config Config) *PublishGrpcServer {
 	port := strconv.Itoa(config.Port)
 	listener, err := net.Listen(config.Network, ":"+port)
 	if err != nil {
@@ -26,7 +26,7 @@ func NewPublishGrpcServer(config Config, db postgresclient.PostgresClient) *Publ
 	}
 
 	grpcServer := grpc.NewServer()
-	server := &PublishGrpcServer{DB: db}
+	server := &PublishGrpcServer{DB: postgresclient.Instance}
 
 	publish.RegisterRepositoryServicePublishServer(grpcServer, server)
 

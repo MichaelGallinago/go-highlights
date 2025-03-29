@@ -1,16 +1,18 @@
 package useCase
 
+import "repositoryService/internal/lib/postgresclient"
+
 type UseCase struct {
 	searchServer  SearchServer
 	publishServer PublishServer
 	db            DB
 }
 
-func NewUseCase(searchServer SearchServer, publishServer PublishServer, db DB) UseCase {
+func NewUseCase(searchServer SearchServer, publishServer PublishServer) UseCase {
 	return UseCase{
 		searchServer:  searchServer,
 		publishServer: publishServer,
-		db:            db,
+		db:            &postgresclient.Instance,
 	}
 }
 

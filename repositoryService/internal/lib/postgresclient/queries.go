@@ -2,8 +2,8 @@ package postgresclient
 
 import (
 	"context"
+	"github.com/jackc/pgx/v5"
 	"repositoryService/internal/core/entity"
-	"time"
 )
 
 // InsertMeme добавляет мем в БД
@@ -27,16 +27,9 @@ func (db *PostgresClient) GetTopLongMemes(ctx context.Context, limit int) ([]ent
 	}
 	defer rows.Close()
 
-	var memes []entity.Meme
-	for rows.Next() {
-		var meme entity.Meme
-		var timestampInt int64
-		if err := rows.Scan(&timestampInt, &meme.Text); err != nil {
-			return nil, err
-		}
-
-		meme.Timestamp = toTime(timestampInt)
-		memes = append(memes, meme)
+	memes, err := pgx.CollectRows(rows, pgx.RowToStructByName[entity.Meme])
+	if err != nil {
+		return nil, err
 	}
 	return memes, nil
 }
@@ -50,16 +43,9 @@ func (db *PostgresClient) SearchMemes(ctx context.Context, query string) ([]enti
 	}
 	defer rows.Close()
 
-	var memes []entity.Meme
-	for rows.Next() {
-		var meme entity.Meme
-		var timestampInt int64
-		if err := rows.Scan(&timestampInt, &meme.Text); err != nil {
-			return nil, err
-		}
-
-		meme.Timestamp = toTime(timestampInt)
-		memes = append(memes, meme)
+	memes, err := pgx.CollectRows(rows, pgx.RowToStructByName[entity.Meme])
+	if err != nil {
+		return nil, err
 	}
 	return memes, nil
 }
@@ -73,36 +59,20 @@ func (db *PostgresClient) GetMemesByMonth(ctx context.Context, month int32) ([]e
 	}
 	defer rows.Close()
 
-	var memes []entity.Meme
-	for rows.Next() {
-		var meme entity.Meme
-		var timestampInt int64
-		if err := rows.Scan(&timestampInt, &meme.Text); err != nil {
-			return nil, err
-		}
-
-		meme.Timestamp = toTime(timestampInt)
-		memes = append(memes, meme)
+	memes, err := pgx.CollectRows(rows, pgx.RowToStructByName[entity.Meme])
+	if err != nil {
+		return nil, err
 	}
 	return memes, nil
 }
 
 // GetRandomMeme возвращает случайный мем
 func (db *PostgresClient) GetRandomMeme(ctx context.Context) (entity.Meme, error) {
-	query := "SELECT timestamp, text FROM memes ORDER BY RANDOM() LIMIT 1"
-	row := db.Pool.QueryRow(ctx, query)
-
 	var meme entity.Meme
-	var timestampInt int64
-	err := row.Scan(&timestampInt, &meme.Text)
+	query := "SELECT timestamp, text FROM memes ORDER BY RANDOM() LIMIT 1"
+	err := db.Pool.QueryRow(ctx, query).Scan(&meme.Timestamp, &meme.Text)
 	if err != nil {
 		return entity.Meme{}, err
 	}
-	meme.Timestamp = toTime(timestampInt)
-
 	return meme, nil
-}
-
-func toTime(timestampInt int64) time.Time {
-	return time.Unix(timestampInt, 0)
 }

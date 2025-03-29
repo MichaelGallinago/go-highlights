@@ -18,7 +18,7 @@ type SearchGrpcServer struct {
 	DB postgresclient.PostgresClient
 }
 
-func NewSearchGrpcServer(config Config, db postgresclient.PostgresClient) *SearchGrpcServer {
+func NewSearchGrpcServer(config Config) *SearchGrpcServer {
 	port := strconv.Itoa(config.Port)
 	listener, err := net.Listen(config.Network, ":"+port)
 	if err != nil {
@@ -26,7 +26,7 @@ func NewSearchGrpcServer(config Config, db postgresclient.PostgresClient) *Searc
 	}
 
 	grpcServer := grpc.NewServer()
-	server := &SearchGrpcServer{DB: db}
+	server := &SearchGrpcServer{DB: postgresclient.Instance}
 	search.RegisterRepositoryServiceSearchServer(grpcServer, server)
 
 	slog.Info("Search gRPC server started on port " + port)
