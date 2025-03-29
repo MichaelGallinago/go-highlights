@@ -9,6 +9,7 @@ import (
 	"parseService/internal/core/entity"
 	repository "parseService/repository/api"
 	"sync"
+	"time"
 )
 
 type GrpcMemeClient struct {
@@ -37,7 +38,7 @@ func (c GrpcMemeClient) Publish(ctx context.Context, meme entity.Meme) error {
 	defer c.conns.Put(client)
 
 	_, err := repository.NewRepositoryServicePublishClient(client).PublishMeme(ctx, &repository.PublishMemeRequest{
-		Timestamp: meme.Timestamp.Format("2006-01-02T15:04:05Z"),
+		Timestamp: meme.Timestamp.Format(time.RFC3339),
 		Text:      meme.Text,
 	})
 	if err != nil {
